@@ -6,7 +6,24 @@
 <title>First Day · STATs Survey</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<script>
+  // Try jsDelivr, then cdnjs, then unpkg — covers CDN outages, ad-block
+  // rules on a specific host, or a stale/blocked path.
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = src;
+      s.onload = resolve;
+      s.onerror = reject;
+      document.head.appendChild(s);
+    });
+  }
+  window.chartReady = loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js')
+    .catch(() => loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js'))
+    .catch(() => loadScript('https://unpkg.com/chart.js@4.4.4/dist/chart.umd.min.js'))
+    .then(() => { window.chartLibOk = true; })
+    .catch(() => { window.chartLibOk = false; console.warn('Chart.js failed to load from all CDNs — charts will be skipped, stats will still show.'); });
+</script>
 <style>
   :root {
     --paper: #faf9f4; --ink: #1b2430; --ink-soft: #4a5568;
@@ -255,6 +272,7 @@ async function loadResults() {
     lastRows = data.rows || [];
     if (lastRows.length === 0) throw new Error('No responses yet.');
 
+    await window.chartReady; // wait for the CDN loader to settle either way
     renderResults(lastHeaders, lastRows);
     emptyEl.style.display = 'none';
     statusEl.innerHTML = '<span class="dot"></span>' + lastRows.length + ' responses · updated ' + new Date().toLocaleTimeString();
@@ -359,7 +377,7 @@ function renderNumeric(card, rawValues) {
   }
   nums.forEach(v => { let idx = width===0?0:Math.floor((v-min)/width); if (idx>=bins) idx=bins-1; counts[idx]++; });
 
-  charts.push(new Chart(card.querySelector('canvas').getContext('2d'), {
+  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
     type:'bar', data:{ labels, datasets:[{ data:counts, backgroundColor:'#2c6e63', borderRadius:3 }] },
     options: baseChartOptions(true)
   }));
@@ -370,7 +388,7 @@ function renderCategorical(card, header, values) {
   values.forEach(v => { const k=v.trim(); counts[k]=(counts[k]||0)+1; });
   const keys = orderCategories(header, Object.keys(counts));
   card.innerHTML += `<div class="n-badge">N = ${values.length}</div><div class="chart-wrap"><canvas></canvas></div>`;
-  charts.push(new Chart(card.querySelector('canvas').getContext('2d'), {
+  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
     type:'bar', data:{ labels:keys, datasets:[{ data:keys.map(k=>counts[k]), backgroundColor:'#c1440e', borderRadius:3 }] },
     options: baseChartOptions(false)
   }));
@@ -385,7 +403,7 @@ function renderMultiSelect(card, header, values) {
   });
   const keys = Object.keys(counts).sort((a,b) => counts[b]-counts[a]);
   card.innerHTML += `<div class="n-badge">N = ${respondents} respondents</div><div class="chart-wrap"><canvas></canvas></div>`;
-  charts.push(new Chart(card.querySelector('canvas').getContext('2d'), {
+  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
     type:'bar', data:{ labels:keys, datasets:[{ data:keys.map(k=>counts[k]), backgroundColor:'#2c6e63', borderRadius:3 }] },
     options: baseChartOptions(false)
   }));
@@ -399,6 +417,22 @@ function renderText(card, values) {
   const topWords = Object.keys(wordCounts).sort((a,b)=>wordCounts[b]-wordCounts[a]).slice(0,10);
   card.innerHTML += `<div class="n-badge">N = ${values.length} responses</div>
     <div class="word-list">${topWords.map(w=>`<span class="word-chip">${escapeHtml(w)} · ${wordCounts[w]}</span>`).join('')}</div>`;
+}
+
+function drawOrFallback(card, buildChart) {
+  const canvas = card.querySelector('canvas');
+  if (window.chartLibOk && typeof Chart !== 'undefined') {
+    try {
+      charts.push(buildChart(canvas));
+      return;
+    } catch (err) {
+      console.warn('Chart render failed, falling back to text:', err);
+    }
+  }
+  // Chart.js unavailable or failed — replace the empty canvas area with
+  // a plain note so the card still reads as complete, not broken.
+  const wrap = canvas.closest('.chart-wrap');
+  if (wrap) wrap.outerHTML = '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:0.72rem;color:var(--ink-soft);margin-top:0.4rem;">(chart unavailable — see numbers above)</div>';
 }
 
 function baseChartOptions(rotate) {

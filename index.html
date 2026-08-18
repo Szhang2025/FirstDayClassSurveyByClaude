@@ -202,21 +202,23 @@ async function onSubmit(e) {
   btn.disabled = true;
   btn.textContent = 'Submitting…';
   try {
-    // text/plain avoids a CORS preflight against the Apps Script domain
-    const res = await fetch(WEBAPP_URL, {
+    // no-cors: Apps Script's CORS headers on POST responses are unreliable,
+    // so we send the data but don't try to read the response back. The
+    // request still reaches doPost() and appends the row; we just can't
+    // confirm success from the response itself (use "View Results" for that).
+    await fetch(WEBAPP_URL, {
       method: 'POST',
+      mode: 'no-cors',
       headers: { 'Content-Type': 'text/plain;charset=utf-8' },
       body: JSON.stringify(payload)
     });
-    const data = await res.json();
-    if (data.status !== 'ok') throw new Error(data.message || 'Unknown error');
     msg.className = 'ok';
-    msg.textContent = '✅ Successfully submitted! Thank you.';
+    msg.textContent = '✅ Submitted! (Check "View Results" below to confirm it landed.)';
     e.target.reset();
   } catch (err) {
     console.error(err);
     msg.className = 'err';
-    msg.textContent = 'Submission failed: ' + err.message;
+    msg.textContent = 'Submission failed: ' + err.message + ' — double-check the Web App is deployed with "Who has access: Anyone".';
   } finally {
     btn.disabled = false;
     btn.textContent = 'Submit Survey';
@@ -325,13 +327,12 @@ function renderResults(headers, rows) {
     const card = document.createElement('div');
     card.className = 'card';
     card.innerHTML = `<h3>${escapeHtml(header)}</h3>`;
+    gridEl.appendChild(card); // attach BEFORE building charts so Chart.js can measure the canvas
 
     if (type === 'NUMERIC') renderNumeric(card, values);
     else if (type === 'CATEGORICAL') renderCategorical(card, header, values);
     else if (type === 'MULTI_SELECT') renderMultiSelect(card, header, values);
     else renderText(card, values);
-
-    gridEl.appendChild(card);
   });
 }
 

@@ -1,452 +1,3256 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>First Day · STATs Survey</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
-<script>
-  // Try jsDelivr, then cdnjs, then unpkg — covers CDN outages, ad-block
-  // rules on a specific host, or a stale/blocked path.
-  function loadScript(src) {
-    return new Promise((resolve, reject) => {
-      const s = document.createElement('script');
-      s.src = src;
-      s.onload = resolve;
-      s.onerror = reject;
-      document.head.appendChild(s);
-    });
-  }
-  window.chartReady = loadScript('https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js')
-    .catch(() => loadScript('https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.5.0/chart.umd.min.js'))
-    .catch(() => loadScript('https://unpkg.com/chart.js@4.4.4/dist/chart.umd.min.js'))
-    .then(() => { window.chartLibOk = true; })
-    .catch(() => { window.chartLibOk = false; console.warn('Chart.js failed to load from all CDNs — charts will be skipped, stats will still show.'); });
-</script>
-<style>
-  :root {
-    --paper: #faf9f4; --ink: #1b2430; --ink-soft: #4a5568;
-    --teal: #2c6e63; --teal-dim: #eaf1ef; --rust: #c1440e;
-    --line: #dedcd3; --card: #ffffff;
-  }
-  * { box-sizing: border-box; }
-  body { margin:0; background:var(--paper); color:var(--ink); font-family:'Inter',sans-serif; -webkit-font-smoothing:antialiased; }
-  .wrap { max-width: 760px; margin: 0 auto; padding: 2.5rem 1.5rem 5rem; }
-  .wrap.wide { max-width: 1100px; }
-  h1 { font-family:'Fraunces',serif; font-weight:600; font-size:clamp(1.8rem,3.4vw,2.5rem); margin:0 0 0.35rem; letter-spacing:-0.01em; }
-  .lede { color: var(--ink-soft); font-size:0.95rem; line-height:1.5; max-width: 60ch; }
-  .anon-note { background:var(--teal-dim); color:var(--teal); border-radius:8px; padding:0.75rem 1rem; font-size:0.85rem; margin: 1.25rem 0 2rem; }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>First Day · STATs Survey</title>
+    <style>
+        /* [All existing CSS remains the same - keep all previous styles] */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+        }
+        body {
+            background: #f7f5f0;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        .survey-card {
+            max-width: 1100px;
+            width: 100%;
+            background: white;
+            border-radius: 40px;
+            padding: 2.8rem 2.8rem 2.5rem;
+            box-shadow: 0 20px 40px -12px rgba(0, 0, 0, 0.15), 0 8px 24px -6px rgba(0, 0, 0, 0.05);
+            border: 1px solid #f0ede6;
+        }
+        @media (max-width: 768px) {
+            .survey-card {
+                padding: 1.8rem 1.2rem;
+            }
+        }
+        .header {
+            border-bottom: 3px solid #8b1e2b;
+            padding-bottom: 1.4rem;
+            margin-bottom: 1.8rem;
+        }
+        .header h1 {
+            font-size: 2rem;
+            font-weight: 600;
+            letter-spacing: -0.02em;
+            color: #1e1e1e;
+        }
+        .intro {
+            background: #faf8f4;
+            padding: 1.2rem 1.6rem;
+            border-radius: 24px;
+            margin-bottom: 2rem;
+            border-left: 6px solid #8b1e2b;
+            font-size: 0.98rem;
+            line-height: 1.6;
+            color: #2a2722;
+        }
+        .intro p {
+            margin-bottom: 0.5rem;
+        }
+        .intro p:last-child {
+            margin-bottom: 0;
+        }
+        .question-block {
+            margin-bottom: 2.2rem;
+        }
+        .q-title {
+            font-weight: 600;
+            font-size: 1.05rem;
+            color: #1e1e1e;
+            display: flex;
+            align-items: baseline;
+            gap: 6px;
+            margin-bottom: 0.6rem;
+        }
+        .q-title .q-num {
+            background: #8b1e2b;
+            color: white;
+            border-radius: 30px;
+            font-size: 0.75rem;
+            font-weight: 600;
+            padding: 0.1rem 0.65rem;
+            margin-right: 4px;
+            flex-shrink: 0;
+        }
+        .q-desc {
+            font-size: 0.92rem;
+            color: #3d3a33;
+            margin-bottom: 0.5rem;
+            opacity: 0.8;
+        }
+        .options-grid {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.6rem 1.4rem;
+            margin-top: 0.4rem;
+            background: #fbfaf8;
+            padding: 0.7rem 1.2rem 0.5rem 1.2rem;
+            border-radius: 24px;
+            border: 1px solid #ece8e0;
+        }
+        .options-grid.vertical {
+            flex-direction: column;
+            gap: 0.3rem;
+        }
+        .option-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            cursor: pointer;
+            padding: 0.15rem 0.2rem;
+            border-radius: 40px;
+            padding-right: 12px;
+            transition: background 0.1s;
+        }
+        .option-item:hover {
+            background: #f0ede6;
+        }
+        .option-item input[type="radio"],
+        .option-item input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            accent-color: #8b1e2b;
+            cursor: pointer;
+            flex-shrink: 0;
+        }
+        .option-item label {
+            font-size: 0.97rem;
+            color: #1f1d1a;
+            cursor: pointer;
+            padding: 2px 0;
+        }
+        .dropdown-select {
+            width: 100%;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 40px;
+            background: white;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: 0.15s;
+            cursor: pointer;
+            appearance: none;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%235e5a52' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+            background-repeat: no-repeat;
+            background-position: right 1.2rem center;
+        }
+        .dropdown-select:focus {
+            border-color: #8b1e2b;
+            box-shadow: 0 0 0 3px rgba(139, 30, 43, 0.15);
+        }
+        .text-input {
+            margin-top: 0.5rem;
+            width: 100%;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 40px;
+            background: white;
+            font-size: 0.95rem;
+            transition: 0.15s;
+            outline: none;
+            resize: vertical;
+            min-height: 56px;
+            font-family: inherit;
+        }
+        .text-input:focus {
+            border-color: #8b1e2b;
+            box-shadow: 0 0 0 3px rgba(139, 30, 43, 0.15);
+        }
+        .text-input-short {
+            min-height: 48px;
+        }
+        .number-input {
+            width: 100%;
+            padding: 0.7rem 1.2rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 40px;
+            background: white;
+            font-size: 0.95rem;
+            font-family: inherit;
+            outline: none;
+            transition: 0.15s;
+        }
+        .number-input:focus {
+            border-color: #8b1e2b;
+            box-shadow: 0 0 0 3px rgba(139, 30, 43, 0.15);
+        }
+        .action-bar {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem 2rem;
+            margin: 1.8rem 0 1.2rem;
+            border-top: 1px solid #e3ded5;
+            padding-top: 2rem;
+        }
+        .btn {
+            border: none;
+            padding: 0.7rem 2.2rem;
+            border-radius: 60px;
+            font-size: 1rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+        }
+        .btn-primary {
+            background: #8b1e2b;
+            color: white;
+            border: 1px solid #701a24;
+            box-shadow: 0 6px 14px rgba(139, 30, 43, 0.2);
+        }
+        .btn-primary:hover {
+            background: #701a24;
+            transform: scale(1.01);
+            box-shadow: 0 10px 20px rgba(139, 30, 43, 0.25);
+        }
+        .btn-primary:disabled {
+            opacity: 0.65;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-secondary {
+            background: #e8e2d7;
+            color: #2a2722;
+            border: 1px solid #ccc6b8;
+        }
+        .btn-secondary:hover {
+            background: #ddd6c9;
+            transform: scale(1.01);
+        }
+        .btn-secondary:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-success {
+            background: #2d6a4f;
+            color: white;
+            border: 1px solid #1b4a36;
+            box-shadow: 0 6px 14px rgba(45, 106, 79, 0.2);
+        }
+        .btn-success:hover {
+            background: #1b4a36;
+            transform: scale(1.01);
+            box-shadow: 0 10px 20px rgba(45, 106, 79, 0.25);
+        }
+        .btn-success:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none;
+        }
+        .btn-purple {
+            background: #6c3b8b;
+            color: white;
+            border: 1px solid #5a2e74;
+            box-shadow: 0 6px 14px rgba(108, 59, 139, 0.2);
+        }
+        .btn-purple:hover {
+            background: #5a2e74;
+            transform: scale(1.01);
+            box-shadow: 0 10px 20px rgba(108, 59, 139, 0.25);
+        }
+        .btn-teal {
+            background: #1a7a7a;
+            color: white;
+            border: 1px solid #146060;
+            box-shadow: 0 6px 14px rgba(26, 122, 122, 0.2);
+        }
+        .btn-teal:hover {
+            background: #146060;
+            transform: scale(1.01);
+            box-shadow: 0 10px 20px rgba(26, 122, 122, 0.25);
+        }
+        .toast-message {
+            margin-top: 0.6rem;
+            background: #e2f0e6;
+            padding: 0.4rem 1.6rem;
+            border-radius: 60px;
+            color: #1a4a2e;
+            font-weight: 450;
+            display: inline-block;
+            opacity: 0;
+            transition: opacity 0.25s;
+            border: 1px solid #b8d5c2;
+        }
+        .toast-message.show {
+            opacity: 1;
+        }
+        .toast-message.error {
+            background: #f8e3e0;
+            color: #8b1e2b;
+            border-color: #dbb8b0;
+        }
+        .loading-spinner {
+            display: inline-block;
+            width: 18px;
+            height: 18px;
+            border: 3px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top-color: #fff;
+            animation: spin 0.8s ease-in-out infinite;
+            vertical-align: middle;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        .results-panel {
+            margin-top: 2rem;
+            background: #faf8f4;
+            border-radius: 28px;
+            padding: 1.6rem 1.8rem 1.8rem;
+            border: 1px solid #e3ded5;
+            display: none;
+        }
+        .results-panel.visible {
+            display: block;
+        }
+        .results-panel h3 {
+            font-weight: 600;
+            font-size: 1.2rem;
+            color: #1e1e1e;
+            margin-bottom: 1.2rem;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .badge-icon {
+            background: #8b1e2b10;
+            padding: 0.1rem 0.6rem;
+            border-radius: 30px;
+            color: #8b1e2b;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        .result-empty {
+            color: #6b655b;
+            font-style: italic;
+            padding: 0.6rem 0;
+        }
+        .footnote {
+            margin-top: 1rem;
+            font-size: 0.8rem;
+            color: #6b655b;
+            background: #f4f1eb;
+            padding: 0.2rem 1.2rem;
+            border-radius: 60px;
+            display: inline-block;
+        }
+        .results-table-wrapper {
+            overflow-x: auto;
+            margin-bottom: 2rem;
+        }
+        .results-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.85rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+        }
+        .results-table thead {
+            background: #8b1e2b;
+            color: white;
+        }
+        .results-table th {
+            padding: 0.7rem 0.5rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            min-width: 80px;
+        }
+        .results-table th:last-child {
+            border-right: none;
+        }
+        .results-table td {
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            border-bottom: 1px solid #e8e4dc;
+            vertical-align: middle;
+        }
+        .results-table tbody tr:hover {
+            background: #f5f3ee;
+        }
+        .results-table .class-cell {
+            font-weight: 600;
+            color: #1e1e1e;
+            background: #f5f3ee;
+            text-align: center;
+            padding: 0.5rem 0.6rem;
+            white-space: nowrap;
+        }
+        .results-table .question-cell {
+            padding: 0.3rem 0.2rem;
+            font-size: 0.8rem;
+        }
+        .results-table .total-cell {
+            font-weight: 500;
+            color: #5e5a52;
+            font-size: 0.8rem;
+        }
+        .free-responses-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e3ded5;
+        }
+        .free-responses-section h4 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e1e1e;
+            margin-bottom: 0.8rem;
+        }
+        .free-responses-list {
+            list-style: none;
+            padding: 0;
+            margin: 0;
+        }
+        .free-responses-list li {
+            background: white;
+            padding: 0.6rem 1rem;
+            border-radius: 12px;
+            border: 1px solid #e8e4dc;
+            font-size: 0.9rem;
+            color: #2a2722;
+            margin-bottom: 0.5rem;
+            position: relative;
+            padding-left: 2rem;
+        }
+        .free-responses-list li::before {
+            content: "•";
+            position: absolute;
+            left: 0.7rem;
+            color: #8b1e2b;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        .free-responses-list .class-group-header {
+            font-weight: 600;
+            color: #1e1e1e;
+            margin-top: 0.8rem;
+            margin-bottom: 0.3rem;
+            font-size: 0.95rem;
+            padding-left: 0.5rem;
+            background: transparent;
+            border: none;
+            padding: 0.3rem 0.5rem;
+        }
+        .free-responses-list .class-group-header::before {
+            content: "";
+            display: none;
+        }
+        .free-responses-list .class-group-header:first-of-type {
+            margin-top: 0;
+        }
+        .stanford-context {
+            margin-top: 1.5rem;
+            padding-top: 1.2rem;
+            border-top: 2px solid #8b1e2b;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #2a2722;
+        }
+        .stanford-context strong {
+            color: #8b1e2b;
+        }
+        .stanford-context .highlight {
+            background: #e8e2d7;
+            padding: 0.1rem 0.4rem;
+            border-radius: 12px;
+            font-weight: 500;
+        }
+        .class-selector-wrapper {
+            margin-bottom: 0.2rem;
+        }
+        .class-selector-wrapper label {
+            font-weight: 500;
+            color: #2a2722;
+            font-size: 0.95rem;
+            display: block;
+            margin-bottom: 0.3rem;
+        }
+        .action-bar-with-download {
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 1.2rem 2rem;
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 1px solid #e3ded5;
+        }
 
-  fieldset { border:none; padding:0; margin:0 0 1.6rem; }
-  .q-label { font-family:'Fraunces',serif; font-weight:600; font-size:1.02rem; margin-bottom:0.55rem; display:flex; gap:0.5rem; align-items:baseline; }
-  .q-num { font-family:'IBM Plex Mono',monospace; font-size:0.72rem; color:var(--teal); }
-  .q-hint { font-weight:400; font-family:'Inter',sans-serif; font-size:0.8rem; color:var(--ink-soft); }
+        /* Variable distribution charts */
+        .charts-section {
+            margin-top: 1.5rem;
+            padding-top: 1.5rem;
+            border-top: 2px solid #e3ded5;
+        }
+        .charts-section h4 {
+            font-weight: 600;
+            font-size: 1rem;
+            color: #1e1e1e;
+            margin-bottom: 0.9rem;
+        }
+        .charts-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1rem;
+        }
+        .chart-card {
+            background: white;
+            border-radius: 16px;
+            padding: 0.6rem 0.6rem 0.4rem;
+            border: 1px solid #e8e4dc;
+        }
+        .chart-card svg {
+            display: block;
+        }
 
-  input[type=text], input[type=number], select, textarea {
-    width:100%; font-family:'Inter',sans-serif; font-size:0.95rem;
-    border:1px solid var(--line); border-radius:7px; padding:0.6rem 0.75rem;
-    background:var(--card); color:var(--ink);
-  }
-  input:focus, select:focus, textarea:focus { outline:2px solid var(--teal); outline-offset:1px; border-color:var(--teal); }
-  textarea { resize:vertical; min-height:70px; }
+        /* Analysis Modal Styles */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .modal-overlay.active {
+            display: flex;
+        }
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-content {
+            background: white;
+            border-radius: 32px;
+            max-width: 950px;
+            width: 95%;
+            max-height: 90vh;
+            overflow-y: auto;
+            padding: 2.5rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+            position: relative;
+        }
+        .modal-close {
+            position: sticky;
+            top: 0;
+            float: right;
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #5e5a52;
+            padding: 0 0.5rem;
+            z-index: 10;
+            transition: color 0.2s;
+        }
+        .modal-close:hover {
+            color: #8b1e2b;
+        }
+        .modal-content h2 {
+            font-size: 1.6rem;
+            margin-bottom: 0.5rem;
+            color: #1e1e1e;
+        }
+        .modal-content .subtitle {
+            color: #5e5a52;
+            margin-bottom: 1.5rem;
+            font-size: 0.95rem;
+        }
+        .analysis-section {
+            margin-bottom: 2rem;
+            padding-bottom: 1.5rem;
+            border-bottom: 1px solid #e8e4dc;
+        }
+        .analysis-section:last-child {
+            border-bottom: none;
+            margin-bottom: 0;
+            padding-bottom: 0;
+        }
+        .analysis-section h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e1e1e;
+            margin-bottom: 0.8rem;
+        }
+        .variable-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.8rem;
+            align-items: center;
+            margin: 0.5rem 0 1rem;
+        }
+        .variable-selector label {
+            font-weight: 500;
+            font-size: 0.85rem;
+            color: #2a2722;
+        }
+        .variable-selector select,
+        .variable-selector input[type="number"],
+        .variable-selector input[type="text"] {
+            padding: 0.4rem 0.8rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            background: white;
+            outline: none;
+            min-width: 120px;
+        }
+        .variable-selector select:focus,
+        .variable-selector input:focus {
+            border-color: #8b1e2b;
+            box-shadow: 0 0 0 3px rgba(139, 30, 43, 0.1);
+        }
+        .variable-selector .checkbox-group {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.3rem 0.8rem;
+            padding: 0.3rem 0.6rem;
+            background: #faf8f4;
+            border-radius: 16px;
+            border: 1px solid #e8e4dc;
+            max-height: 120px;
+            overflow-y: auto;
+        }
+        .variable-selector .checkbox-group label {
+            font-weight: 400;
+            font-size: 0.8rem;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+        }
+        .variable-selector .checkbox-group input[type="checkbox"] {
+            accent-color: #8b1e2b;
+            width: 14px;
+            height: 14px;
+            cursor: pointer;
+        }
+        .run-analysis-btn {
+            background: #8b1e2b;
+            color: white;
+            border: none;
+            padding: 0.5rem 1.5rem;
+            border-radius: 30px;
+            font-size: 0.85rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        .run-analysis-btn:hover {
+            background: #701a24;
+        }
+        .analysis-result {
+            background: #faf8f4;
+            border-radius: 16px;
+            padding: 1rem 1.2rem;
+            margin-top: 0.8rem;
+            font-size: 0.9rem;
+            line-height: 1.6;
+            border: 1px solid #e8e4dc;
+            max-height: 400px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+        .analysis-result .stat-label {
+            color: #8b1e2b;
+            font-weight: 600;
+        }
+        .analysis-result .interpretation {
+            color: #1a4a2e;
+            font-weight: 500;
+            background: #e8f5ee;
+            padding: 0.3rem 0.6rem;
+            border-radius: 8px;
+            margin-top: 0.5rem;
+        }
+        .analysis-result svg {
+            display: block;
+            margin: 0.5rem auto;
+            background: white;
+            border-radius: 8px;
+            border: 1px solid #e8e4dc;
+        }
+        .analysis-result table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+            font-size: 0.85rem;
+        }
+        .analysis-result table th {
+            background: #e8e4dc;
+            padding: 0.3rem 0.6rem;
+            text-align: left;
+        }
+        .analysis-result table td {
+            padding: 0.3rem 0.6rem;
+            border-bottom: 1px solid #e8e4dc;
+        }
+        .analysis-result .significant {
+            color: #8b1e2b;
+            font-weight: 600;
+        }
+        .analysis-result .not-significant {
+            color: #5e5a52;
+        }
+        .inline-group {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.3rem;
+            flex-wrap: wrap;
+        }
+        .inline-group label {
+            font-size: 0.8rem;
+        }
+        .inline-group input[type="radio"] {
+            accent-color: #8b1e2b;
+            width: 14px;
+            height: 14px;
+        }
+        .gof-proportion-input {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            align-items: center;
+            padding: 0.5rem;
+            background: #faf8f4;
+            border-radius: 12px;
+            border: 1px solid #e8e4dc;
+        }
+        .gof-proportion-input .prop-item {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .gof-proportion-input .prop-item label {
+            font-size: 0.8rem;
+            font-weight: 500;
+        }
+        .gof-proportion-input .prop-item input {
+            width: 60px;
+            padding: 0.2rem 0.4rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+        .gof-proportion-input .prop-item input:focus {
+            border-color: #8b1e2b;
+            outline: none;
+        }
+        .gof-proportion-input .prop-item input:disabled {
+            background: #f0ede6;
+            cursor: not-allowed;
+        }
 
-  .opt-list { display:flex; flex-direction:column; gap:0.4rem; }
-  .opt { display:flex; align-items:center; gap:0.55rem; font-size:0.92rem; }
-  .opt input { width:auto; }
-
-  button { font-family:'Inter',sans-serif; font-weight:500; font-size:0.9rem; border-radius:7px; padding:0.7rem 1.2rem; cursor:pointer; border:1px solid var(--line); background:var(--card); color:var(--ink); transition:transform .12s ease, border-color .12s ease; }
-  button:hover { border-color:var(--teal); transform:translateY(-1px); }
-  button.primary { background:var(--teal); color:#fff; border-color:var(--teal); }
-  button:disabled { opacity:.5; cursor:wait; transform:none; }
-
-  #submitMsg { margin-top:1rem; font-family:'IBM Plex Mono',monospace; font-size:0.85rem; display:none; }
-  #submitMsg.ok { color:var(--teal); display:block; }
-  #submitMsg.err { color:var(--rust); display:block; }
-
-  hr.divider { border:none; border-top:1px solid var(--line); margin: 3rem 0; }
-
-  header.results-head { display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:1rem; margin-bottom:1.5rem; }
-  .status { font-family:'IBM Plex Mono',monospace; font-size:0.78rem; color:var(--ink-soft); margin-top:0.4rem; }
-  .status .dot { display:inline-block; width:7px; height:7px; border-radius:50%; background:var(--teal); margin-right:6px; }
-  .actions { display:flex; gap:0.6rem; }
-
-  #empty, #resultsError { font-family:'IBM Plex Mono',monospace; color:var(--ink-soft); padding:2.5rem 1rem; text-align:center; }
-  #resultsError { color:var(--rust); display:none; }
-
-  .grid { display:grid; grid-template-columns:repeat(auto-fit,minmax(280px,1fr)); gap:1.1rem; }
-  .card { background:var(--card); border:1px solid var(--line); border-radius:10px; padding:1.15rem 1.25rem 1.35rem; }
-  .card h3 { font-family:'Fraunces',serif; font-size:1.0rem; font-weight:600; margin:0 0 0.65rem; line-height:1.3; }
-  .stat-row { display:flex; justify-content:space-between; font-size:0.84rem; padding:0.26rem 0; border-bottom:1px dashed var(--line); }
-  .stat-row:last-child { border-bottom:none; }
-  .stat-row .k { color:var(--ink-soft); }
-  .stat-row .v { font-family:'IBM Plex Mono',monospace; font-weight:500; }
-  .chart-wrap { position:relative; height:180px; margin-top:0.6rem; }
-  .n-badge { display:inline-block; background:var(--teal-dim); color:var(--teal); font-family:'IBM Plex Mono',monospace; font-size:0.72rem; padding:0.15rem 0.5rem; border-radius:5px; margin-bottom:0.6rem; }
-  .word-list { display:flex; flex-wrap:wrap; gap:0.35rem; margin-top:0.5rem; }
-  .word-chip { background:var(--teal-dim); color:var(--teal); font-family:'IBM Plex Mono',monospace; font-size:0.72rem; padding:0.18rem 0.5rem; border-radius:5px; }
-</style>
+        /* Data Viewer Styles */
+        .data-viewer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            animation: fadeIn 0.3s ease;
+        }
+        .data-viewer-overlay.active {
+            display: flex;
+        }
+        .data-viewer-content {
+            background: white;
+            border-radius: 32px;
+            max-width: 1200px;
+            width: 95%;
+            max-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            padding: 2rem;
+            box-shadow: 0 30px 60px rgba(0, 0, 0, 0.3);
+        }
+        .data-viewer-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 1rem;
+            border-bottom: 1px solid #e8e4dc;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .data-viewer-header h2 {
+            font-size: 1.4rem;
+            color: #1e1e1e;
+        }
+        .data-viewer-header .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.8rem;
+            cursor: pointer;
+            color: #5e5a52;
+            padding: 0 0.5rem;
+        }
+        .data-viewer-header .close-btn:hover {
+            color: #8b1e2b;
+        }
+        .data-viewer-controls {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            align-items: center;
+            padding: 0.8rem 0;
+            border-bottom: 1px solid #e8e4dc;
+        }
+        .data-viewer-controls .search-box {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.5rem 1rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 30px;
+            font-size: 0.9rem;
+            outline: none;
+        }
+        .data-viewer-controls .search-box:focus {
+            border-color: #8b1e2b;
+            box-shadow: 0 0 0 3px rgba(139, 30, 43, 0.1);
+        }
+        .data-viewer-controls .results-count {
+            font-size: 0.85rem;
+            color: #5e5a52;
+            white-space: nowrap;
+        }
+        .data-viewer-table-wrapper {
+            overflow: auto;
+            flex: 1;
+            margin-top: 0.5rem;
+        }
+        .data-viewer-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 0.8rem;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+        }
+        .data-viewer-table thead {
+            background: #8b1e2b;
+            color: white;
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+        .data-viewer-table th {
+            padding: 0.5rem 0.4rem;
+            text-align: center;
+            font-weight: 600;
+            font-size: 0.75rem;
+            border-right: 1px solid rgba(255, 255, 255, 0.2);
+            white-space: nowrap;
+            cursor: pointer;
+            user-select: none;
+        }
+        .data-viewer-table th:last-child {
+            border-right: none;
+        }
+        .data-viewer-table th:hover {
+            background: #701a24;
+        }
+        .data-viewer-table th .sort-icon {
+            margin-left: 4px;
+            font-size: 0.6rem;
+        }
+        .data-viewer-table td {
+            padding: 0.4rem 0.3rem;
+            text-align: center;
+            border-bottom: 1px solid #e8e4dc;
+            vertical-align: middle;
+            max-width: 200px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .data-viewer-table tbody tr:hover {
+            background: #f5f3ee;
+        }
+        .data-viewer-table tbody tr.hidden-row {
+            display: none;
+        }
+        .data-viewer-footer {
+            padding-top: 0.8rem;
+            border-top: 1px solid #e8e4dc;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        .data-viewer-footer .pagination {
+            display: flex;
+            gap: 0.3rem;
+            align-items: center;
+        }
+        .data-viewer-footer .pagination button {
+            padding: 0.2rem 0.6rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 12px;
+            background: white;
+            cursor: pointer;
+            font-size: 0.8rem;
+        }
+        .data-viewer-footer .pagination button:hover {
+            background: #f0ede6;
+        }
+        .data-viewer-footer .pagination button.active {
+            background: #8b1e2b;
+            color: white;
+            border-color: #8b1e2b;
+        }
+        .data-viewer-footer .pagination button:disabled {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+        .data-viewer-footer .rows-per-page {
+            display: flex;
+            align-items: center;
+            gap: 0.3rem;
+            font-size: 0.8rem;
+            color: #5e5a52;
+        }
+        .data-viewer-footer .rows-per-page select {
+            padding: 0.2rem 0.4rem;
+            border: 1px solid #d6d0c4;
+            border-radius: 12px;
+            font-size: 0.8rem;
+        }
+    </style>
 </head>
 <body>
 
-<div class="wrap">
-  <h1>📊 First Day · STATs Survey</h1>
-  <p class="lede">You won't know the exact answers to all of these — best guess is fine.</p>
-  <div class="anon-note">Your answers are anonymous. Submitting this form does not collect your name or email unless you type it in yourself.</div>
+    <div class="survey-card">
+        <div class="header">
+            <h1>📊 First Day · STATs Survey</h1>
+        </div>
 
-  <form id="surveyForm"></form>
-  <div id="submitMsg"></div>
-</div>
+        <div class="intro">
+            <p>You won't know the exact answers to all these questions. In those cases, please give your best guess.</p>
+            <p>Keep in mind that your answers to this survey are anonymous. When you submit this form, it will not automatically collect your details like name and email address unless you provide it yourself.</p>
+        </div>
 
-<hr class="divider">
+        <form id="surveyForm" onsubmit="return handleSubmit(event)">
+            <!-- Class Dropdown -->
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">0</span> Your Course <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(select your class)</span></div>
+                <div class="class-selector-wrapper">
+                    <select class="dropdown-select" id="classSelect" name="class" required>
+                        <option value="">— Select your course —</option>
+                        <option value="STAT 103">STAT 103</option>
+                        <option value="STAT 210">STAT 210</option>
+                        <option value="STAT 239">STAT 239</option>
+                        <option value="STAT 321">STAT 321</option>
+                        <option value="STAT 325">STAT 325</option>
+                        <option value="STAT 353">STAT 353</option>
+                        <option value="STAT 360">STAT 360</option>
+                        <option value="STAT 380">STAT 380</option>
+                        <option value="STAT 415">STAT 415</option>
+                        <option value="Other">Other</option>
+                    </select>
+                </div>
+            </div>
 
-<div class="wrap wide">
-  <header class="results-head">
-    <div>
-      <h1 style="font-size:1.6rem;">Class Survey Results Live</h1>
-      <p class="status" id="status"><span class="dot"></span>Click "View Results" to load data.</p>
+            <!-- Q1-Q19 -->
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">1</span> What is your height? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(in inches, 1 foot = 12 inches)</span></div>
+                <input type="number" class="number-input" name="q1_height" id="q1_height" placeholder="e.g., 68" min="40" max="96" step="0.5" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">2</span> What is your gender? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q2_gender" value="Female" /> <label>Female</label></div>
+                    <div class="option-item"><input type="radio" name="q2_gender" value="Male" /> <label>Male</label></div>
+                    <div class="option-item"><input type="radio" name="q2_gender" value="Non-binary" /> <label>Non-binary</label></div>
+                    <div class="option-item"><input type="radio" name="q2_gender" value="Prefer not to say" /> <label>Prefer not to say</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">3</span> Aside from class time, how many hours per week, on average, do you expect to spend studying for this course? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(rounded up to nearest hour)</span></div>
+                <input type="number" class="number-input" name="q3_study_hours" id="q3_study_hours" placeholder="e.g., 6" min="0" max="50" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">4</span> How many minutes per day, on average, do you spend on screens? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(in minutes)</span></div>
+                <input type="number" class="number-input" name="q4_screen_time" id="q4_screen_time" placeholder="e.g., 210" min="0" max="1440" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">5</span> How many hours per week, on average, do you participate in sports or physical exercise? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(in hours)</span></div>
+                <input type="number" class="number-input" name="q5_exercise_hours" id="q5_exercise_hours" placeholder="e.g., 3" min="0" max="50" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">6</span> How would you rate your overall happiness? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q6_happiness" value="Very happy" /> <label>Very happy</label></div>
+                    <div class="option-item"><input type="radio" name="q6_happiness" value="Happy" /> <label>Happy</label></div>
+                    <div class="option-item"><input type="radio" name="q6_happiness" value="Neutral" /> <label>Neutral</label></div>
+                    <div class="option-item"><input type="radio" name="q6_happiness" value="Unhappy" /> <label>Unhappy</label></div>
+                    <div class="option-item"><input type="radio" name="q6_happiness" value="Very unhappy" /> <label>Very unhappy</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">7</span> How many pets do you have? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(whole number)</span></div>
+                <input type="number" class="number-input" name="q7_pets" id="q7_pets" placeholder="e.g., 2" min="0" max="100" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">8</span> How many minutes have you spent using your phone so far today? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(number)</span></div>
+                <input type="number" class="number-input" name="q8_phone_minutes" id="q8_phone_minutes" placeholder="e.g., 120" min="0" max="1440" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">9</span> Were you born in the United States? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q9_born_us" value="Yes" /> <label>Yes</label></div>
+                    <div class="option-item"><input type="radio" name="q9_born_us" value="No" /> <label>No</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">10</span> How long since you've seen a movie in a theater? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q10_movie" value="Less than 7 days" /> <label>Less than 7 days</label></div>
+                    <div class="option-item"><input type="radio" name="q10_movie" value="7 - 14 days" /> <label>7 - 14 days</label></div>
+                    <div class="option-item"><input type="radio" name="q10_movie" value="15 - 30 days" /> <label>15 - 30 days</label></div>
+                    <div class="option-item"><input type="radio" name="q10_movie" value="31 - 180 days" /> <label>31 - 180 days</label></div>
+                    <div class="option-item"><input type="radio" name="q10_movie" value="More than 180 days or Never" /> <label>More than 180 days or Never</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">11</span> How many stuffed animals do you own? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(whole number)</span></div>
+                <input type="number" class="number-input" name="q11_stuffed_animals" id="q11_stuffed_animals" placeholder="e.g., 3" min="0" max="1000" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">12</span> Have you attended an institution besides SCSU after high school? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q12_other_institution" value="Yes" /> <label>Yes</label></div>
+                    <div class="option-item"><input type="radio" name="q12_other_institution" value="No" /> <label>No</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">13</span> What year of university are you currently in? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q13_year" value="Freshman" /> <label>Freshman</label></div>
+                    <div class="option-item"><input type="radio" name="q13_year" value="Sophomore" /> <label>Sophomore</label></div>
+                    <div class="option-item"><input type="radio" name="q13_year" value="Junior" /> <label>Junior</label></div>
+                    <div class="option-item"><input type="radio" name="q13_year" value="Senior" /> <label>Senior</label></div>
+                    <div class="option-item"><input type="radio" name="q13_year" value="PSEO/Other" /> <label>PSEO/Other</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">14</span> Randomly select a whole number between 1 and 10. <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(whole number)</span></div>
+                <input type="number" class="number-input" name="q14_random_number" id="q14_random_number" placeholder="e.g., 7" min="1" max="10" step="1" />
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">15</span> What do you value more in this course? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q15_value" value="Grade (GPA)" /> <label>Grade (GPA)</label></div>
+                    <div class="option-item"><input type="radio" name="q15_value" value="Knowledge and Skills" /> <label>Knowledge and Skills</label></div>
+                    <div class="option-item"><input type="radio" name="q15_value" value="Both equally" /> <label>Both equally</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">16</span> How do you feel about artificial intelligence? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q16_ai_excite" value="Very excited" /> <label>Very excited</label></div>
+                    <div class="option-item"><input type="radio" name="q16_ai_excite" value="Neutral" /> <label>Neutral</label></div>
+                    <div class="option-item"><input type="radio" name="q16_ai_excite" value="Skeptical" /> <label>Skeptical</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">17</span> How much trust do you have in AI systems? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(single choice)</span></div>
+                <div class="options-grid">
+                    <div class="option-item"><input type="radio" name="q17_ai_trust" value="High trust" /> <label>High trust</label></div>
+                    <div class="option-item"><input type="radio" name="q17_ai_trust" value="Neutral" /> <label>Neutral</label></div>
+                    <div class="option-item"><input type="radio" name="q17_ai_trust" value="Low trust" /> <label>Low trust</label></div>
+                </div>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">18</span> What do you hope to gain from this course? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(short answer)</span></div>
+                <textarea class="text-input text-input-short" name="q18_expectation" id="q18_expectation" placeholder="e.g., I want to master data analysis and complete a capstone project."></textarea>
+            </div>
+
+            <div class="question-block">
+                <div class="q-title"><span class="q-num">19</span> What should the course emphasize? <span style="font-weight:400; font-size:0.8rem; margin-left:6px; color:#5a554b;">(select all that apply)</span></div>
+                <div class="options-grid vertical" style="gap: 0.2rem;">
+                    <div class="option-item"><input type="checkbox" name="q19_emphasis" value="Theoretical depth" /> <label>Theoretical depth</label></div>
+                    <div class="option-item"><input type="checkbox" name="q19_emphasis" value="Hands-on projects" /> <label>Hands-on projects</label></div>
+                    <div class="option-item"><input type="checkbox" name="q19_emphasis" value="Class interaction" /> <label>Class interaction and discussion</label></div>
+                    <div class="option-item"><input type="checkbox" name="q19_emphasis" value="Cutting-edge cases" /> <label>Cutting-edge cases</label></div>
+                    <div class="option-item"><input type="checkbox" name="q19_emphasis" value="Career development" /> <label>Career development and industry links</label></div>
+                </div>
+            </div>
+
+            <input type="hidden" name="timestamp" id="timestampField" value="" />
+
+            <div class="action-bar">
+                <button type="submit" class="btn btn-primary" id="submitBtn">Submit Survey</button>
+                <button type="button" class="btn btn-secondary" id="showResultsBtn">View Survey Results</button>
+            </div>
+
+            <div id="toastMessage" class="toast-message">Successfully submitted!</div>
+        </form>
+
+        <!-- Results Panel -->
+        <div id="resultsPanel" class="results-panel">
+            <h3>Class Survey Results <span class="badge-icon">Live</span></h3>
+
+            <div id="resultsContent">
+                <div class="result-empty">Click "View Survey Results" to load data.</div>
+            </div>
+
+            <div id="stanfordContext" class="stanford-context" style="display: none;">
+                <p><strong>📊 Stanford AI Index Report</strong></p>
+                <p><span class="highlight">84%</span> of Chinese respondents are excited about AI (highest globally), compared to <span class="highlight">38%</span> in the US.</p>
+                <p style="margin-top: 0.5rem;">Additionally, <span class="highlight">72%</span> in China trust AI, vs. <span class="highlight">32%</span> in the US.</p>
+                <p style="margin-top: 0.5rem; font-size: 0.9rem; color: #5e5a52;">Source: Stanford University Human-Centered AI Institute · AI Index Report</p>
+            </div>
+
+            <div class="action-bar-with-download">
+                <button type="button" class="btn btn-success" id="downloadCsvBtn">📥 Download Data (CSV)</button>
+                <button type="button" class="btn btn-teal" id="viewDataBtn">📋 View Raw Data</button>
+                <button type="button" class="btn btn-purple" id="analyzeBtn">📊 Analyze Data</button>
+                <button type="button" class="btn btn-secondary" id="refreshResultsBtn">🔄 Refresh Results</button>
+            </div>
+
+            <div class="footnote" style="margin-top:1rem;">Data from Google Sheets · Auto-updated</div>
+        </div>
     </div>
-    <div class="actions">
-      <button class="primary" onclick="loadResults()">👁 View Results</button>
-      <button onclick="loadResults()" id="refreshBtn">🔄 Refresh</button>
-      <button onclick="downloadCSV()">📥 Download CSV</button>
+
+    <!-- Data Viewer Modal -->
+    <div class="data-viewer-overlay" id="dataViewerModal">
+        <div class="data-viewer-content">
+            <div class="data-viewer-header">
+                <h2>📋 Raw Survey Data</h2>
+                <button class="close-btn" id="dataViewerCloseBtn">&times;</button>
+            </div>
+            <div class="data-viewer-controls">
+                <input type="text" class="search-box" id="dataViewerSearch" placeholder="🔍 Search across all columns..." />
+                <span class="results-count" id="dataViewerCount">Showing 0 rows</span>
+            </div>
+            <div class="data-viewer-table-wrapper">
+                <table class="data-viewer-table" id="dataViewerTable">
+                    <thead id="dataViewerHeader"></thead>
+                    <tbody id="dataViewerBody"></tbody>
+                </table>
+            </div>
+            <div class="data-viewer-footer">
+                <div class="rows-per-page">
+                    Rows per page:
+                    <select id="dataViewerRowsPerPage">
+                        <option value="10">10</option>
+                        <option value="25" selected>25</option>
+                        <option value="50">50</option>
+                        <option value="100">100</option>
+                    </select>
+                </div>
+                <div class="pagination" id="dataViewerPagination"></div>
+            </div>
+        </div>
     </div>
-  </header>
-  <div id="empty">No data loaded yet.</div>
-  <div id="resultsError"></div>
-  <div class="grid" id="grid"></div>
-</div>
 
-<script>
-/* -----------------------------------------------------------------
-   CONFIG — paste your deployed Code.gs Web App URL here
-   (ends in /exec)
---------------------------------------------------------------------*/
-const WEBAPP_URL = 'https://script.google.com/macros/s/AKfycbzWCw8BoV0FqIRT0iw5ImLPuZ77Lk-v0tyfOJ_HPyHG8SCiLm6NqkdTaacsc8lgt_OA5g/exec';
+    <!-- Analysis Modal -->
+    <div class="modal-overlay" id="analysisModal">
+        <div class="modal-content">
+            <button class="modal-close" id="modalCloseBtn">&times;</button>
+            <h2>📊 Data Analysis</h2>
+            <p class="subtitle">Perform statistical tests and visualizations on the survey data.</p>
 
-/* ------------------------- question config ------------------------- */
-const QUESTIONS = [
-  { id:'q0', label:'Your Course', type:'select', options:['STAT 103','STAT 210','STAT 239','STAT 321','STAT 325','STAT 353','STAT 360','STAT 380','STAT 415','Other'] },
-  { id:'q1', label:'What is your height? (in inches, 1 foot = 12 inches)', type:'number' },
-  { id:'q2', label:'What is your gender?', type:'radio', options:['Female','Male','Non-binary','Prefer not to say'] },
-  { id:'q3', label:'Aside from class time, how many hours per week, on average, do you expect to spend studying for this course? (rounded up to nearest hour)', type:'number' },
-  { id:'q4', label:'How many minutes per day, on average, do you spend on screens?', type:'number' },
-  { id:'q5', label:'How many hours per week, on average, do you participate in sports or physical exercise?', type:'number' },
-  { id:'q6', label:'How would you rate your overall happiness?', type:'radio', options:['Very happy','Happy','Neutral','Unhappy','Very unhappy'] },
-  { id:'q7', label:'How many pets do you have?', type:'number' },
-  { id:'q8', label:'How many minutes have you spent using your phone so far today?', type:'number' },
-  { id:'q9', label:'Were you born in the United States?', type:'radio', options:['Yes','No'] },
-  { id:'q10', label:"How long since you've seen a movie in a theater?", type:'radio', options:['Less than 7 days','7 - 14 days','15 - 30 days','31 - 180 days','More than 180 days or Never'] },
-  { id:'q11', label:'How many stuffed animals do you own?', type:'number' },
-  { id:'q12', label:'Have you attended an institution besides SCSU after high school?', type:'radio', options:['Yes','No'] },
-  { id:'q13', label:'What year of university are you currently in?', type:'radio', options:['Freshman','Sophomore','Junior','Senior','PSEO/Other'] },
-  { id:'q14', label:'Randomly select a whole number between 1 and 10.', type:'number' },
-  { id:'q15', label:'What do you value more in this course?', type:'radio', options:['Grade (GPA)','Knowledge and Skills','Both equally'] },
-  { id:'q16', label:'How do you feel about artificial intelligence?', type:'radio', options:['Very excited','Neutral','Skeptical'] },
-  { id:'q17', label:'How much trust do you have in AI systems?', type:'radio', options:['High trust','Neutral','Low trust'] },
-  { id:'q18', label:'What do you hope to gain from this course?', type:'text' },
-  { id:'q19', label:'What should the course emphasize? (select all that apply)', type:'checkbox', options:['Theoretical depth','Hands-on projects','Class interaction and discussion','Cutting-edge cases','Career development and industry links'] }
-];
+            <!-- Scatterplot -->
+            <div class="analysis-section">
+                <h3>📈 Scatterplot</h3>
+                <div class="variable-selector">
+                    <label>X-axis:</label>
+                    <select id="scatterX"></select>
+                    <label>Y-axis:</label>
+                    <select id="scatterY"></select>
+                    <button class="run-analysis-btn" data-test="scatter">Generate</button>
+                </div>
+                <div class="analysis-result" id="scatterResult">Select variables and click Generate.</div>
+            </div>
 
-const CATEGORICAL_MAX_UNIQUE = 12;
-const NUMERIC_THRESHOLD = 0.8;
-const ORDINAL_ORDERS = [
-  { match:/happiness/i, order:['Very happy','Happy','Neutral','Unhappy','Very unhappy'] },
-  { match:/seen a movie in a theater/i, order:['Less than 7 days','7 - 14 days','15 - 30 days','31 - 180 days','More than 180 days or Never'] },
-  { match:/feel about artificial intelligence/i, order:['Very excited','Neutral','Skeptical'] },
-  { match:/trust.*AI/i, order:['High trust','Neutral','Low trust'] },
-  { match:/year of university/i, order:['Freshman','Sophomore','Junior','Senior','PSEO/Other'] }
-];
-const STOPWORDS = new Set(['the','a','an','and','or','but','to','of','in','on','for','is','it','i','my','me','with','this','that','be','was','are','as','at','how','from','course','class','learn','learning','more','about','want','would','like','get','so','not','can','will','just','have','has']);
+            <!-- Regression -->
+            <div class="analysis-section">
+                <h3>📉 Multiple Regression</h3>
+                <div class="variable-selector">
+                    <label>Response (Y):</label>
+                    <select id="regY"></select>
+                    <label>Predictors (X):</label>
+                    <div id="regXContainer" class="checkbox-group"></div>
+                    <button class="run-analysis-btn" data-test="regression">Run Regression</button>
+                </div>
+                <div class="analysis-result" id="regResult">Select variables and click Run Regression.</div>
+            </div>
 
-/* --------------------------- build form --------------------------- */
-function buildForm() {
-  const form = document.getElementById('surveyForm');
-  QUESTIONS.forEach((q, i) => {
-    const fs = document.createElement('fieldset');
-    let inner = `<div class="q-label"><span class="q-num">${i}</span> ${escapeHtml(q.label)}</div>`;
+            <!-- t-test -->
+            <div class="analysis-section">
+                <h3>🧪 t-Test</h3>
+                <div class="variable-selector">
+                    <label>Type:</label>
+                    <select id="ttestType">
+                        <option value="one">One-Sample</option>
+                        <option value="two">Two-Sample</option>
+                    </select>
+                    <label>Variable:</label>
+                    <select id="ttestVar"></select>
+                    <div id="ttestGroupContainer" style="display:none;">
+                        <label>Group:</label>
+                        <select id="ttestGroup"></select>
+                    </div>
+                    <div id="ttestMuContainer">
+                        <label>μ₀:</label>
+                        <input type="number" id="ttestMu" value="0" step="0.1" style="width:80px;" />
+                    </div>
+                    <label>Alternative:</label>
+                    <select id="ttestAlt">
+                        <option value="two">Two-sided (≠)</option>
+                        <option value="greater">Greater than (>)</option>
+                        <option value="less">Less than (<)</option>
+                    </select>
+                    <button class="run-analysis-btn" data-test="ttest">Run t-Test</button>
+                </div>
+                <div class="analysis-result" id="ttestResult">Select variables and click Run t-Test.</div>
+            </div>
 
-    if (q.type === 'select') {
-      inner += `<select name="${q.id}" required><option value="" disabled selected>— Select —</option>` +
-        q.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('') + `</select>`;
-    } else if (q.type === 'number') {
-      inner += `<input type="number" name="${q.id}" required>`;
-    } else if (q.type === 'text') {
-      inner += `<textarea name="${q.id}"></textarea>`;
-    } else if (q.type === 'radio') {
-      inner += `<div class="opt-list">` + q.options.map((o, j) =>
-        `<label class="opt"><input type="radio" name="${q.id}" value="${escapeHtml(o)}" ${j===0?'required':''}> ${escapeHtml(o)}</label>`
-      ).join('') + `</div>`;
-    } else if (q.type === 'checkbox') {
-      inner += `<div class="opt-list">` + q.options.map(o =>
-        `<label class="opt"><input type="checkbox" name="${q.id}" value="${escapeHtml(o)}"> ${escapeHtml(o)}</label>`
-      ).join('') + `</div>`;
-    }
-    fs.innerHTML = inner;
-    form.appendChild(fs);
-  });
+            <!-- z-test for proportion -->
+            <div class="analysis-section">
+                <h3>📊 Z-Test for Proportion</h3>
+                <div class="variable-selector">
+                    <label>Type:</label>
+                    <select id="ztestType">
+                        <option value="one">One-Sample</option>
+                        <option value="two">Two-Sample</option>
+                    </select>
+                    <label>Variable:</label>
+                    <select id="ztestVar"></select>
+                    <div id="ztestGroupContainer" style="display:none;">
+                        <label>Group:</label>
+                        <select id="ztestGroup"></select>
+                    </div>
+                    <div id="ztestP0Container">
+                        <label>p₀:</label>
+                        <input type="number" id="ztestP0" value="0.5" step="0.05" min="0" max="1" style="width:80px;" />
+                    </div>
+                    <label>Alternative:</label>
+                    <select id="ztestAlt">
+                        <option value="two">Two-sided (≠)</option>
+                        <option value="greater">Greater than (>)</option>
+                        <option value="less">Less than (<)</option>
+                    </select>
+                    <button class="run-analysis-btn" data-test="ztest">Run Z-Test</button>
+                </div>
+                <div class="analysis-result" id="ztestResult">Select variables and click Run Z-Test.</div>
+            </div>
 
-  const submitBtn = document.createElement('button');
-  submitBtn.type = 'submit';
-  submitBtn.className = 'primary';
-  submitBtn.textContent = 'Submit Survey';
-  form.appendChild(submitBtn);
+            <!-- Chi-square -->
+            <div class="analysis-section">
+                <h3>📋 Chi-Square Test</h3>
+                <div class="variable-selector">
+                    <label>Type:</label>
+                    <select id="chisqType">
+                        <option value="independence">Independence (Two Variables)</option>
+                        <option value="gof">Goodness-of-Fit (One Variable)</option>
+                    </select>
+                    <label>Variable 1:</label>
+                    <select id="chisqVar1"></select>
+                    <div id="chisqVar2Container">
+                        <label>Variable 2:</label>
+                        <select id="chisqVar2"></select>
+                    </div>
+                    <div id="chisqGOFContainer" style="display:none;">
+                        <label>Expected:</label>
+                        <select id="chisqGOFType">
+                            <option value="equal">Equal proportions</option>
+                            <option value="custom">Custom proportions</option>
+                        </select>
+                        <div id="chisqGOFInputs" style="display:none;"></div>
+                    </div>
+                    <button class="run-analysis-btn" data-test="chisq">Run Chi-Square</button>
+                </div>
+                <div class="analysis-result" id="chisqResult">Select variables and click Run Chi-Square.</div>
+            </div>
 
-  form.addEventListener('submit', onSubmit);
-}
+            <!-- ANOVA -->
+            <div class="analysis-section">
+                <h3>📊 One-Way ANOVA</h3>
+                <div class="variable-selector">
+                    <label>Response (Y):</label>
+                    <select id="anovaY"></select>
+                    <label>Group (Factor):</label>
+                    <select id="anovaGroup"></select>
+                    <button class="run-analysis-btn" data-test="anova">Run ANOVA</button>
+                </div>
+                <div class="analysis-result" id="anovaResult">Select variables and click Run ANOVA.</div>
+            </div>
+        </div>
+    </div>
 
-async function onSubmit(e) {
-  e.preventDefault();
-  const msg = document.getElementById('submitMsg');
-  const btn = e.target.querySelector('button[type=submit]');
-  const fd = new FormData(e.target);
+    <script>
+        (function() {
+            const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzWCw8BoV0FqIRT0iw5ImLPuZ77Lk-v0tyfOJ_HPyHG8SCiLm6NqkdTaacsc8lgt_OA5g/exec';
 
-  const payload = {};
-  QUESTIONS.forEach(q => {
-    if (q.type === 'checkbox') {
-      payload[q.label] = fd.getAll(q.id).join(', ');
-    } else {
-      payload[q.label] = fd.get(q.id) || '';
-    }
-  });
+            // DOM elements
+            const form = document.getElementById('surveyForm');
+            const submitBtn = document.getElementById('submitBtn');
+            const showResultsBtn = document.getElementById('showResultsBtn');
+            const downloadBtn = document.getElementById('downloadCsvBtn');
+            const refreshBtn = document.getElementById('refreshResultsBtn');
+            const analyzeBtn = document.getElementById('analyzeBtn');
+            const viewDataBtn = document.getElementById('viewDataBtn');
+            const toast = document.getElementById('toastMessage');
+            const resultsPanel = document.getElementById('resultsPanel');
+            const resultsContent = document.getElementById('resultsContent');
+            const stanfordContext = document.getElementById('stanfordContext');
+            const classSelect = document.getElementById('classSelect');
 
-  if (WEBAPP_URL.includes('PASTE_YOUR')) {
-    msg.className = 'err';
-    msg.textContent = 'Set WEBAPP_URL at the top of the script to your deployed Code.gs Web App URL.';
-    return;
-  }
+            // Data Viewer elements
+            const dataViewerModal = document.getElementById('dataViewerModal');
+            const dataViewerCloseBtn = document.getElementById('dataViewerCloseBtn');
+            const dataViewerSearch = document.getElementById('dataViewerSearch');
+            const dataViewerHeader = document.getElementById('dataViewerHeader');
+            const dataViewerBody = document.getElementById('dataViewerBody');
+            const dataViewerCount = document.getElementById('dataViewerCount');
+            const dataViewerPagination = document.getElementById('dataViewerPagination');
+            const dataViewerRowsPerPage = document.getElementById('dataViewerRowsPerPage');
 
-  btn.disabled = true;
-  btn.textContent = 'Submitting…';
-  try {
-    // no-cors: Apps Script's CORS headers on POST responses are unreliable,
-    // so we send the data but don't try to read the response back. The
-    // request still reaches doPost() and appends the row; we just can't
-    // confirm success from the response itself (use "View Results" for that).
-    await fetch(WEBAPP_URL, {
-      method: 'POST',
-      mode: 'no-cors',
-      headers: { 'Content-Type': 'text/plain;charset=utf-8' },
-      body: JSON.stringify(payload)
-    });
-    msg.className = 'ok';
-    msg.textContent = '✅ Submitted! (Check "View Results" below to confirm it landed.)';
-    e.target.reset();
-  } catch (err) {
-    console.error(err);
-    msg.className = 'err';
-    msg.textContent = 'Submission failed: ' + err.message + ' — double-check the Web App is deployed with "Who has access: Anyone".';
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Submit Survey';
-  }
-}
+            const modal = document.getElementById('analysisModal');
+            const modalClose = document.getElementById('modalCloseBtn');
 
-function escapeHtml(s) { return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+            let latestData = null;
+            let rawDataArray = [];
+            let filteredData = [];
+            let currentPage = 1;
+            let rowsPerPage = 25;
+            let sortColumn = null;
+            let sortAsc = true;
 
-/* ------------------------- results / analytics ------------------------- */
-let lastHeaders = [], lastRows = [], charts = [];
+            const tsField = document.getElementById('timestampField');
+            if (tsField) tsField.value = new Date().toLocaleString('en-US', { hour12: false });
 
-async function loadResults() {
-  const statusEl = document.getElementById('status');
-  const errorEl = document.getElementById('resultsError');
-  const emptyEl = document.getElementById('empty');
-  const refreshBtn = document.getElementById('refreshBtn');
+            // ==================== TOAST ====================
+            function showToast(msg, isError = false) {
+                toast.textContent = msg;
+                toast.className = 'toast-message show' + (isError ? ' error' : '');
+                clearTimeout(window.toastTimer);
+                window.toastTimer = setTimeout(() => { toast.classList.remove('show'); }, 5000);
+            }
 
-  if (WEBAPP_URL.includes('PASTE_YOUR')) {
-    errorEl.style.display = 'block';
-    errorEl.textContent = 'Set WEBAPP_URL at the top of the script to your deployed Code.gs Web App URL.';
-    emptyEl.style.display = 'none';
-    return;
-  }
+            // ==================== HELPERS ====================
+            function getRadioValue(name) {
+                const el = document.querySelector(`input[name="${name}"]:checked`);
+                return el ? el.value : '';
+            }
 
-  refreshBtn.disabled = true;
-  statusEl.innerHTML = '<span class="dot"></span>Loading responses…';
-  errorEl.style.display = 'none';
+            function getCheckboxValues(name) {
+                const checked = document.querySelectorAll(`input[name="${name}"]:checked`);
+                return Array.from(checked).map(el => el.value);
+            }
 
-  try {
-    const res = await fetch(WEBAPP_URL + '?cb=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const data = await res.json();
-    lastHeaders = data.headers || [];
-    lastRows = data.rows || [];
-    if (lastRows.length === 0) throw new Error('No responses yet.');
+            function getNumberValue(id) {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            }
 
-    await window.chartReady; // wait for the CDN loader to settle either way
-    renderResults(lastHeaders, lastRows);
-    emptyEl.style.display = 'none';
-    statusEl.innerHTML = '<span class="dot"></span>' + lastRows.length + ' responses · updated ' + new Date().toLocaleTimeString();
-  } catch (err) {
-    console.error(err);
-    errorEl.style.display = 'block';
-    errorEl.textContent = 'Could not load data: ' + err.message;
-    statusEl.textContent = 'Load failed.';
-  } finally {
-    refreshBtn.disabled = false;
-  }
-}
+            function getTextValue(id) {
+                const el = document.getElementById(id);
+                return el ? el.value : '';
+            }
 
-async function downloadCSV() {
-  if (WEBAPP_URL.includes('PASTE_YOUR')) {
-    alert('Set WEBAPP_URL at the top of the script first.');
-    return;
-  }
-  try {
-    const res = await fetch(WEBAPP_URL + '?format=csv&cb=' + Date.now());
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const csvText = await res.text();
-    const blob = new Blob([csvText], { type: 'text/csv;charset=utf-8;' });
-    const blobUrl = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = blobUrl;
-    a.download = 'first_day_survey_responses_' + new Date().toISOString().slice(0,10) + '.csv';
-    document.body.appendChild(a);
-    a.click();
-    document.body.removeChild(a);
-    URL.revokeObjectURL(blobUrl);
-  } catch (err) {
-    console.error(err);
-    alert('Download failed: ' + err.message);
-  }
-}
+            // ==================== SUBMIT ====================
+            window.handleSubmit = function(event) {
+                event.preventDefault();
+                const className = classSelect.value;
+                const q1 = getNumberValue('q1_height');
+                const q2 = getRadioValue('q2_gender');
+                const q3 = getNumberValue('q3_study_hours');
+                const q4 = getNumberValue('q4_screen_time');
+                const q5 = getNumberValue('q5_exercise_hours');
+                const q6 = getRadioValue('q6_happiness');
+                const q7 = getNumberValue('q7_pets');
+                const q8 = getNumberValue('q8_phone_minutes');
+                const q9 = getRadioValue('q9_born_us');
+                const q10 = getRadioValue('q10_movie');
+                const q11 = getNumberValue('q11_stuffed_animals');
+                const q12 = getRadioValue('q12_other_institution');
+                const q13 = getRadioValue('q13_year');
+                const q14 = getNumberValue('q14_random_number');
+                const q15 = getRadioValue('q15_value');
+                const q16 = getRadioValue('q16_ai_excite');
+                const q17 = getRadioValue('q17_ai_trust');
+                const q18 = getTextValue('q18_expectation');
+                const q19 = getCheckboxValues('q19_emphasis').join('; ') || '(none selected)';
+                const timestamp = tsField?.value || new Date().toLocaleString('en-US', { hour12: false });
 
-function classifyColumn(header, values) {
-  const h = header.toLowerCase();
-  if (h.includes('select all that apply')) return 'MULTI_SELECT';
-  const numericCount = values.filter(v => v !== '' && !isNaN(Number(v))).length;
-  if (numericCount / values.length >= NUMERIC_THRESHOLD) return 'NUMERIC';
-  const uniqueCount = new Set(values.map(v => String(v).trim())).size;
-  if (uniqueCount <= CATEGORICAL_MAX_UNIQUE) return 'CATEGORICAL';
-  return 'TEXT';
-}
-function orderCategories(header, keys) {
-  const rule = ORDINAL_ORDERS.find(r => r.match.test(header));
-  if (!rule) return keys.sort();
-  return rule.order.filter(k => keys.includes(k)).concat(keys.filter(k => !rule.order.includes(k)).sort());
-}
-function percentile(sorted, p) {
-  const idx = p * (sorted.length - 1), lo = Math.floor(idx), hi = Math.ceil(idx);
-  return lo === hi ? sorted[lo] : sorted[lo] + (sorted[hi]-sorted[lo]) * (idx-lo);
-}
-const round2 = x => Math.round(x*100)/100;
+                if (!className) { showToast('Please select your course from the dropdown.', true); return false; }
+                if (!q15 || !q16 || !q17) { showToast('Please answer questions 15, 16, and 17.', true); return false; }
 
-function renderResults(headers, rows) {
-  const gridEl = document.getElementById('grid');
-  gridEl.innerHTML = '';
-  charts.forEach(c => c.destroy());
-  charts = [];
+                const formData = {
+                    timestamp, class: className,
+                    q1_height: q1, q2_gender: q2, q3_study_hours: q3, q4_screen_time: q4,
+                    q5_exercise_hours: q5, q6_happiness: q6, q7_pets: q7, q8_phone_minutes: q8,
+                    q9_born_us: q9, q10_movie: q10, q11_stuffed_animals: q11, q12_other_institution: q12,
+                    q13_year: q13, q14_random_number: q14, q15_value: q15, q16_ai_excite: q16,
+                    q17_ai_trust: q17, q18_expectation: q18, q19_emphasis: q19
+                };
 
-  headers.forEach((header, colIndex) => {
-    if (!header || header.toLowerCase() === 'timestamp') return;
-    const values = rows.map(r => (r[header] ?? '').toString()).filter(v => v.trim() !== '');
-    if (values.length === 0) return;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = '<span class="loading-spinner"></span> Submitting...';
 
-    const type = classifyColumn(header, values);
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `<h3>${escapeHtml(header)}</h3>`;
-    gridEl.appendChild(card); // attach BEFORE building charts so Chart.js can measure the canvas
+                fetch(SCRIPT_URL, {
+                        method: 'POST',
+                        mode: 'no-cors',
+                        cache: 'no-cache',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify(formData)
+                    })
+                    .then(() => {
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Submit Survey';
+                        showToast('Successfully submitted!');
+                    })
+                    .catch(err => {
+                        console.error(err);
+                        submitBtn.disabled = false;
+                        submitBtn.innerHTML = 'Submit Survey';
+                        showToast('Submission failed. Please try again.', true);
+                    });
+                return false;
+            };
 
-    if (type === 'NUMERIC') renderNumeric(card, values);
-    else if (type === 'CATEGORICAL') renderCategorical(card, header, values);
-    else if (type === 'MULTI_SELECT') renderMultiSelect(card, header, values);
-    else renderText(card, values);
-  });
-}
+            // ==================== FETCH RESULTS ====================
+            async function fetchResults() {
+                showResultsBtn.disabled = true;
+                showResultsBtn.innerHTML = '<span class="loading-spinner"></span> Loading...';
 
-function renderNumeric(card, rawValues) {
-  const nums = rawValues.map(Number).filter(n => !isNaN(n)).sort((a,b) => a-b);
-  const n = nums.length;
-  const mean = nums.reduce((a,b) => a+b, 0) / n;
-  const sd = n > 1 ? Math.sqrt(nums.reduce((a,b) => a + (b-mean)**2, 0) / (n-1)) : 0;
-  const median = percentile(nums, 0.5);
-  const min = nums[0], max = nums[n-1];
+                try {
+                    const response = await fetch(SCRIPT_URL, {
+                        method: 'GET',
+                        mode: 'cors',
+                        cache: 'no-cache',
+                        headers: { 'Accept': 'application/json' }
+                    });
+                    if (!response.ok) throw new Error(`HTTP error! status: ${response.status}`);
+                    const data = await response.json();
+                    latestData = data;
+                    rawDataArray = data.rawData || [];
 
-  card.innerHTML += `<div class="n-badge">N = ${n}</div>
-    <div class="stat-row"><span class="k">Mean</span><span class="v">${round2(mean)}</span></div>
-    <div class="stat-row"><span class="k">Median</span><span class="v">${round2(median)}</span></div>
-    <div class="stat-row"><span class="k">Std Dev</span><span class="v">${round2(sd)}</span></div>
-    <div class="stat-row"><span class="k">Range</span><span class="v">${min} – ${max}</span></div>
-    <div class="chart-wrap"><canvas></canvas></div>`;
+                    renderResults(data);
+                    resultsPanel.classList.add('visible');
+                    stanfordContext.style.display = 'block';
+                    showToast('Results updated');
+                } catch (err) {
+                    console.error('Failed to fetch results:', err);
+                    showToast('Unable to load results. Check Apps Script deployment.', true);
+                    resultsPanel.classList.add('visible');
+                    resultsContent.innerHTML = `<div class="result-empty">Load failed: ${err.message}</div>`;
+                } finally {
+                    showResultsBtn.disabled = false;
+                    showResultsBtn.innerHTML = 'View Survey Results';
+                }
+            }
 
-  const bins = 8, width = (max-min)/bins || 1;
-  const labels = [], counts = new Array(bins).fill(0);
-  for (let i=0;i<bins;i++) {
-    const lo = min+i*width, hi = i===bins-1 ? max : min+(i+1)*width;
-    labels.push(round2(lo)+'–'+round2(hi));
-  }
-  nums.forEach(v => { let idx = width===0?0:Math.floor((v-min)/width); if (idx>=bins) idx=bins-1; counts[idx]++; });
+            // ==================== RENDER RESULTS ====================
+            function renderResults(data) {
+                if (!data || data.error) {
+                    resultsContent.innerHTML = `<div class="result-empty">${data?.error || 'No data available.'}</div>`;
+                    return;
+                }
+                if (!data.tableData || data.tableData.length === 0) {
+                    resultsContent.innerHTML =
+                        `<div class="result-empty">No survey responses yet. Submit a survey to see results.</div>`;
+                    return;
+                }
 
-  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
-    type:'bar', data:{ labels, datasets:[{ data:counts, backgroundColor:'#2c6e63', borderRadius:3 }] },
-    options: baseChartOptions(true)
-  }));
-}
+                const quantitativeQuestions = ['q1', 'q3', 'q4', 'q5', 'q7', 'q8', 'q11', 'q14'];
+                const questionLabels = {
+                    q1: 'Height (inches)',
+                    q2: 'Gender',
+                    q3: 'Study Hrs/Week',
+                    q4: 'Screen Time (min)',
+                    q5: 'Exercise (hrs)',
+                    q6: 'Happiness',
+                    q7: 'Pets (count)',
+                    q8: 'Phone (min)',
+                    q9: 'Born in US',
+                    q10: 'Movie Theater',
+                    q11: 'Stuffed Animals',
+                    q12: 'Other Institution',
+                    q13: 'Year',
+                    q14: 'Random #',
+                    q15: 'Grade vs. Skills',
+                    q16: 'AI Excitement',
+                    q17: 'AI Trust',
+                    q19: 'Course Emphasis'
+                };
 
-function renderCategorical(card, header, values) {
-  const counts = {};
-  values.forEach(v => { const k=v.trim(); counts[k]=(counts[k]||0)+1; });
-  const keys = orderCategories(header, Object.keys(counts));
-  card.innerHTML += `<div class="n-badge">N = ${values.length}</div><div class="chart-wrap"><canvas></canvas></div>`;
-  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
-    type:'bar', data:{ labels:keys, datasets:[{ data:keys.map(k=>counts[k]), backgroundColor:'#c1440e', borderRadius:3 }] },
-    options: baseChartOptions(false)
-  }));
-}
+                let html = '<div class="results-table-wrapper"><table class="results-table"><thead><tr><th>Course</th>';
+                const orderedQuestions = ['q1', 'q2', 'q3', 'q4', 'q5', 'q6', 'q7', 'q8', 'q9', 'q10', 'q11', 'q12', 'q13',
+                    'q14', 'q15', 'q16', 'q17', 'q19'
+                ];
+                orderedQuestions.forEach(qId => {
+                    html += `<th>${questionLabels[qId] || qId}</th>`;
+                });
+                html += '<th>Total</th></tr></thead><tbody>';
 
-function renderMultiSelect(card, header, values) {
-  const counts = {}; let respondents = 0;
-  values.forEach(v => {
-    if (!v.trim()) return;
-    respondents++;
-    v.split(',').map(x=>x.trim()).filter(Boolean).forEach(opt => { counts[opt]=(counts[opt]||0)+1; });
-  });
-  const keys = Object.keys(counts).sort((a,b) => counts[b]-counts[a]);
-  card.innerHTML += `<div class="n-badge">N = ${respondents} respondents</div><div class="chart-wrap"><canvas></canvas></div>`;
-  drawOrFallback(card, (canvas) => new Chart(canvas.getContext('2d'), {
-    type:'bar', data:{ labels:keys, datasets:[{ data:keys.map(k=>counts[k]), backgroundColor:'#2c6e63', borderRadius:3 }] },
-    options: baseChartOptions(false)
-  }));
-}
+                data.tableData.forEach(row => {
+                    html += `<tr><td class="class-cell">${row.class || 'Unspecified'}</td>`;
+                    orderedQuestions.forEach(qId => {
+                        const qData = row[qId];
+                        if (!qData || typeof qData !== 'object' || Object.keys(qData).length === 0) {
+                            html += `<td class="question-cell">—</td>`;
+                            return;
+                        }
+                        let displayText = '';
+                        if (quantitativeQuestions.includes(qId)) {
+                            const values = [];
+                            Object.keys(qData).forEach(value => {
+                                const numValue = parseFloat(value);
+                                if (!isNaN(numValue)) {
+                                    const count = qData[value];
+                                    for (let i = 0; i < count; i++) values.push(numValue);
+                                }
+                            });
+                            if (values.length > 0) {
+                                const sum = values.reduce((a, b) => a + b, 0);
+                                const mean = sum / values.length;
+                                const squaredDiffs = values.map(v => Math.pow(v - mean, 2));
+                                const variance = squaredDiffs.reduce((a, b) => a + b, 0) / values.length;
+                                const stdDev = Math.sqrt(variance);
+                                displayText = `M = ${mean.toFixed(1)}, SD = ${stdDev.toFixed(1)} (n=${values.length})`;
+                            } else {
+                                displayText = '—';
+                            }
+                        } else {
+                            const sorted = Object.entries(qData).sort((a, b) => b[1] - a[1]);
+                            const total = sorted.reduce((sum, [, count]) => sum + count, 0);
+                            if (total > 0) {
+                                const parts = [];
+                                sorted.forEach(([label, count]) => {
+                                    const pct = Math.round((count / total) * 100);
+                                    if (pct > 0) parts.push(`${label}: ${pct}%`);
+                                });
+                                displayText = parts.join('; ') || '—';
+                            } else {
+                                displayText = '—';
+                            }
+                        }
+                        html += `<td class="question-cell">${displayText}</td>`;
+                    });
+                    html += `<td class="total-cell">${row.total || 0}</td></tr>`;
+                });
+                html += '</tbody></table></div>';
 
-function renderText(card, values) {
-  const wordCounts = {};
-  values.forEach(v => {
-    v.toLowerCase().split(/[^a-z']+/).forEach(w => { if (w.length<3 || STOPWORDS.has(w)) return; wordCounts[w]=(wordCounts[w]||0)+1; });
-  });
-  const topWords = Object.keys(wordCounts).sort((a,b)=>wordCounts[b]-wordCounts[a]).slice(0,10);
-  card.innerHTML += `<div class="n-badge">N = ${values.length} responses</div>
-    <div class="word-list">${topWords.map(w=>`<span class="word-chip">${escapeHtml(w)} · ${wordCounts[w]}</span>`).join('')}</div>`;
-}
+                if (data.freeResponses && data.freeResponses.length > 0) {
+                    const groupedResponses = {};
+                    data.freeResponses.forEach(item => {
+                        const className = item.class || 'Unspecified';
+                        if (!groupedResponses[className]) groupedResponses[className] = [];
+                        groupedResponses[className].push(item.response);
+                    });
+                    html += `<div class="free-responses-section">`;
+                    html += `<h4>📝 Free Responses (Q18: What do you hope to gain from this course?)</h4>`;
+                    html += `<ul class="free-responses-list">`;
+                    const sortedClassNames = Object.keys(groupedResponses).sort();
+                    sortedClassNames.forEach(className => {
+                        const responses = groupedResponses[className];
+                        html += `<li class="class-group-header">${className}</li>`;
+                        responses.forEach(response => {
+                            html += `<li>${response}</li>`;
+                        });
+                    });
+                    html += `</ul></div>`;
+                }
+                html +=
+                    `<div style="margin-top: 1rem; font-size: 0.9rem; color: #5e5a52;"><strong>Total Responses:</strong> ${data.totalResponses || 0}</div>`;
+                html += renderVariableChartsHTML();
+                resultsContent.innerHTML = html;
 
-function drawOrFallback(card, buildChart) {
-  const canvas = card.querySelector('canvas');
-  if (window.chartLibOk && typeof Chart !== 'undefined') {
-    try {
-      charts.push(buildChart(canvas));
-      return;
-    } catch (err) {
-      console.warn('Chart render failed, falling back to text:', err);
-    }
-  }
-  // Chart.js unavailable or failed — replace the empty canvas area with
-  // a plain note so the card still reads as complete, not broken.
-  const wrap = canvas.closest('.chart-wrap');
-  if (wrap) wrap.outerHTML = '<div style="font-family:\'IBM Plex Mono\',monospace;font-size:0.72rem;color:var(--ink-soft);margin-top:0.4rem;">(chart unavailable — see numbers above)</div>';
-}
+                if (rawDataArray.length > 0) {
+                    populateAnalysisDropdowns();
+                }
+            }
 
-function baseChartOptions(rotate) {
-  return {
-    responsive:true, maintainAspectRatio:false,
-    plugins:{ legend:{ display:false } },
-    scales:{
-      x:{ ticks:{ font:{ size:9 }, maxRotation: rotate?0:40 }, grid:{ display:false } },
-      y:{ beginAtZero:true, ticks:{ font:{ size:9 }, precision:0 }, grid:{ color:'#eee' } }
-    }
-  };
-}
+            // ==================== VARIABLE DISTRIBUTION CHARTS (ignores class) ====================
+            function escapeXML(s) {
+                return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+            }
 
-buildForm();
-</script>
+            function barSVG(labels, values, title) {
+                const width = 480, height = 260;
+                const padding = { top: 34, right: 16, bottom: 64, left: 40 };
+                const chartW = width - padding.left - padding.right;
+                const chartH = height - padding.top - padding.bottom;
+                const maxV = Math.max(...values, 1);
+                const n = values.length;
+                const slot = chartW / n;
+                const barW = Math.max(slot - 10, 4);
+                let svg = `<svg viewBox="0 0 ${width} ${height}" xmlns="http://www.w3.org/2000/svg" style="width:100%;height:auto;">`;
+                svg += `<rect width="${width}" height="${height}" fill="white"/>`;
+                svg += `<text x="${width/2}" y="20" text-anchor="middle" font-size="12" font-weight="600" fill="#1e1e1e">${escapeXML(title)}</text>`;
+                svg += `<line x1="${padding.left}" y1="${padding.top+chartH}" x2="${width-padding.right}" y2="${padding.top+chartH}" stroke="#ccc" stroke-width="1"/>`;
+                values.forEach((v, i) => {
+                    const barH = maxV > 0 ? (v / maxV) * chartH : 0;
+                    const x = padding.left + i * slot + (slot - barW) / 2;
+                    const y = padding.top + chartH - barH;
+                    svg += `<rect x="${x.toFixed(1)}" y="${y.toFixed(1)}" width="${barW.toFixed(1)}" height="${barH.toFixed(1)}" fill="#8b1e2b" opacity="0.85" rx="2"/>`;
+                    svg += `<text x="${(x+barW/2).toFixed(1)}" y="${(y-4).toFixed(1)}" text-anchor="middle" font-size="9" fill="#333">${v}</text>`;
+                    const lbl = String(labels[i]);
+                    const shortLbl = lbl.length > 12 ? lbl.slice(0, 11) + '…' : lbl;
+                    const lx = (x + barW / 2).toFixed(1), ly = (padding.top + chartH + 12).toFixed(1);
+                    svg += `<text x="${lx}" y="${ly}" text-anchor="end" font-size="8" fill="#5e5a52" transform="rotate(-40 ${lx} ${ly})">${escapeXML(shortLbl)}</text>`;
+                });
+                svg += `</svg>`;
+                return svg;
+            }
+
+            function histogramSVG(values, title) {
+                const unique = [...new Set(values)];
+                if (unique.length <= 10) {
+                    unique.sort((a, b) => a - b);
+                    const counts = unique.map(u => values.filter(v => v === u).length);
+                    return barSVG(unique.map(String), counts, title);
+                }
+                const min = Math.min(...values), max = Math.max(...values);
+                const bins = 7;
+                const binWidth = (max - min) / bins || 1;
+                const labels = [], counts = new Array(bins).fill(0);
+                for (let i = 0; i < bins; i++) {
+                    const lo = min + i * binWidth, hi = i === bins - 1 ? max : min + (i + 1) * binWidth;
+                    labels.push(`${lo.toFixed(0)}–${hi.toFixed(0)}`);
+                }
+                values.forEach(v => {
+                    let idx = binWidth === 0 ? 0 : Math.floor((v - min) / binWidth);
+                    if (idx >= bins) idx = bins - 1;
+                    counts[idx]++;
+                });
+                return barSVG(labels, counts, title);
+            }
+
+            function renderVariableChartsHTML() {
+                if (rawDataArray.length === 0) return '';
+
+                // 'class' is intentionally excluded — these charts pool every
+                // response together regardless of course.
+                const numericVars = ['q1_height', 'q3_study_hours', 'q4_screen_time', 'q5_exercise_hours',
+                    'q7_pets', 'q8_phone_minutes', 'q11_stuffed_animals', 'q14_random_number'
+                ];
+                const categoricalVars = ['q2_gender', 'q6_happiness', 'q9_born_us', 'q10_movie',
+                    'q12_other_institution', 'q13_year', 'q15_value', 'q16_ai_excite', 'q17_ai_trust'
+                ];
+                const multiSelectVars = ['q19_emphasis'];
+                const varLabels = {
+                    'q1_height': 'Height (inches)', 'q2_gender': 'Gender', 'q3_study_hours': 'Study Hours',
+                    'q4_screen_time': 'Screen Time (min)', 'q5_exercise_hours': 'Exercise (hrs)',
+                    'q6_happiness': 'Happiness', 'q7_pets': 'Pets', 'q8_phone_minutes': 'Phone (min)',
+                    'q9_born_us': 'Born in US', 'q10_movie': 'Movie Theater', 'q11_stuffed_animals': 'Stuffed Animals',
+                    'q12_other_institution': 'Other Institution', 'q13_year': 'Year', 'q14_random_number': 'Random Number',
+                    'q15_value': 'Grade vs. Skills', 'q16_ai_excite': 'AI Excitement', 'q17_ai_trust': 'AI Trust',
+                    'q19_emphasis': 'Course Emphasis'
+                };
+
+                let cards = '';
+
+                numericVars.forEach(v => {
+                    const vals = getNumericValues(v);
+                    if (vals.length === 0) return;
+                    cards += `<div class="chart-card">${histogramSVG(vals, varLabels[v] || v)}</div>`;
+                });
+
+                categoricalVars.forEach(v => {
+                    const vals = getCategoricalValues(v);
+                    if (vals.length === 0) return;
+                    const counts = {};
+                    vals.forEach(x => { counts[x] = (counts[x] || 0) + 1; });
+                    const labels = Object.keys(counts);
+                    const values = labels.map(l => counts[l]);
+                    cards += `<div class="chart-card">${barSVG(labels, values, varLabels[v] || v)}</div>`;
+                });
+
+                multiSelectVars.forEach(v => {
+                    const raw = getCategoricalValues(v);
+                    const counts = {};
+                    raw.forEach(entry => {
+                        entry.split(';').map(s => s.trim()).filter(s => s && s !== '(none selected)').forEach(opt => {
+                            counts[opt] = (counts[opt] || 0) + 1;
+                        });
+                    });
+                    const labels = Object.keys(counts);
+                    if (labels.length === 0) return;
+                    const values = labels.map(l => counts[l]);
+                    cards += `<div class="chart-card">${barSVG(labels, values, varLabels[v] || v)}</div>`;
+                });
+
+                if (!cards) return '';
+                return `<div class="charts-section"><h4>📊 Variable Distributions <span style="font-weight:400;font-size:0.8rem;color:#5e5a52;">(all courses combined)</span></h4><div class="charts-grid">${cards}</div></div>`;
+            }
+
+            // ==================== POPULATE ANALYSIS DROPDOWNS ====================
+            function populateAnalysisDropdowns() {
+                if (rawDataArray.length === 0) return;
+
+                const sample = rawDataArray[0];
+                const varNames = Object.keys(sample).filter(k => k !== 'timestamp');
+
+                const quantitativeVars = ['q1_height', 'q3_study_hours', 'q4_screen_time', 'q5_exercise_hours',
+                    'q7_pets', 'q8_phone_minutes', 'q11_stuffed_animals', 'q14_random_number'
+                ];
+                const categoricalVars = ['class', 'q2_gender', 'q6_happiness', 'q9_born_us', 'q10_movie',
+                    'q12_other_institution', 'q13_year', 'q15_value', 'q16_ai_excite', 'q17_ai_trust', 'q19_emphasis'
+                ];
+
+                const varLabels = {
+                    'q1_height': 'Height (inches)',
+                    'q2_gender': 'Gender',
+                    'q3_study_hours': 'Study Hours',
+                    'q4_screen_time': 'Screen Time',
+                    'q5_exercise_hours': 'Exercise Hours',
+                    'q6_happiness': 'Happiness',
+                    'q7_pets': 'Pets',
+                    'q8_phone_minutes': 'Phone Minutes',
+                    'q9_born_us': 'Born in US',
+                    'q10_movie': 'Movie Theater',
+                    'q11_stuffed_animals': 'Stuffed Animals',
+                    'q12_other_institution': 'Other Institution',
+                    'q13_year': 'Year',
+                    'q14_random_number': 'Random Number',
+                    'q15_value': 'Grade vs. Skills',
+                    'q16_ai_excite': 'AI Excitement',
+                    'q17_ai_trust': 'AI Trust',
+                    'q19_emphasis': 'Course Emphasis'
+                };
+
+                function populateSelect(selectId, vars, includeAll = true) {
+                    const select = document.getElementById(selectId);
+                    if (!select) return;
+                    select.innerHTML = '';
+                    if (includeAll) {
+                        const opt = document.createElement('option');
+                        opt.value = '';
+                        opt.textContent = '— Select —';
+                        select.appendChild(opt);
+                    }
+                    vars.forEach(v => {
+                        const opt = document.createElement('option');
+                        opt.value = v;
+                        opt.textContent = varLabels[v] || v;
+                        select.appendChild(opt);
+                    });
+                }
+
+                populateSelect('scatterX', quantitativeVars);
+                populateSelect('scatterY', quantitativeVars);
+                populateSelect('regY', quantitativeVars);
+                populateSelect('ttestVar', quantitativeVars);
+                populateSelect('ttestGroup', categoricalVars);
+                populateSelect('ztestVar', categoricalVars.filter(v => {
+                    const vals = getColumnValues(v);
+                    const unique = [...new Set(vals)];
+                    return unique.length === 2;
+                }));
+                populateSelect('ztestGroup', categoricalVars);
+                populateSelect('chisqVar1', categoricalVars);
+                populateSelect('chisqVar2', categoricalVars);
+                populateSelect('anovaY', quantitativeVars);
+                populateSelect('anovaGroup', categoricalVars);
+
+                if (document.getElementById('scatterX')) document.getElementById('scatterX').value = 'q1_height';
+                if (document.getElementById('scatterY')) document.getElementById('scatterY').value = 'q3_study_hours';
+                if (document.getElementById('regY')) document.getElementById('regY').value = 'q3_study_hours';
+                if (document.getElementById('ttestVar')) document.getElementById('ttestVar').value = 'q1_height';
+                if (document.getElementById('ztestVar')) document.getElementById('ztestVar').value = 'q9_born_us';
+                if (document.getElementById('chisqVar1')) document.getElementById('chisqVar1').value = 'q9_born_us';
+                if (document.getElementById('chisqVar2')) document.getElementById('chisqVar2').value = 'q13_year';
+                if (document.getElementById('anovaY')) document.getElementById('anovaY').value = 'q3_study_hours';
+                if (document.getElementById('anovaGroup')) document.getElementById('anovaGroup').value = 'q13_year';
+
+                updateRegCheckboxes();
+            }
+
+            // ==================== REGRESSION CHECKBOXES ====================
+            function updateRegCheckboxes() {
+                const container = document.getElementById('regXContainer');
+                const regY = document.getElementById('regY').value;
+
+                if (!container) return;
+
+                const quantitativeVars = ['q1_height', 'q3_study_hours', 'q4_screen_time', 'q5_exercise_hours',
+                    'q7_pets', 'q8_phone_minutes', 'q11_stuffed_animals', 'q14_random_number'
+                ];
+
+                const varLabels = {
+                    'q1_height': 'Height (inches)',
+                    'q3_study_hours': 'Study Hours',
+                    'q4_screen_time': 'Screen Time',
+                    'q5_exercise_hours': 'Exercise Hours',
+                    'q7_pets': 'Pets',
+                    'q8_phone_minutes': 'Phone Minutes',
+                    'q11_stuffed_animals': 'Stuffed Animals',
+                    'q14_random_number': 'Random Number'
+                };
+
+                let html = '';
+                quantitativeVars.forEach(v => {
+                    if (v === regY) return;
+                    const checked = document.querySelector(`#regXContainer input[value="${v}"]`)?.checked ? 'checked' : '';
+                    html += `<label><input type="checkbox" value="${v}" ${checked} /> ${varLabels[v] || v}</label>`;
+                });
+                container.innerHTML = html || '<span style="color:#5e5a52;font-size:0.8rem;">No other predictors available.</span>';
+            }
+
+            // ==================== DATA HELPERS ====================
+            function getColumnValues(colName) {
+                return rawDataArray.map(row => row[colName]).filter(v => v !== undefined && v !== null && v !== '');
+            }
+
+            function getNumericValues(colName) {
+                return getColumnValues(colName).map(v => parseFloat(v)).filter(v => !isNaN(v));
+            }
+
+            function getCategoricalValues(colName) {
+                return getColumnValues(colName).map(v => v.toString().trim());
+            }
+
+            // ==================== LISTWISE DELETION ====================
+            function getAlignedData(columns) {
+                const completeRows = rawDataArray.filter(row => {
+                    return columns.every(col => {
+                        const val = row[col];
+                        return val !== undefined && val !== null && val !== '';
+                    });
+                });
+
+                const result = {};
+                columns.forEach(col => {
+                    const values = completeRows.map(row => row[col]);
+                    const numValues = values.map(v => parseFloat(v)).filter(v => !isNaN(v));
+                    if (numValues.length === values.length) {
+                        result[col] = numValues;
+                    } else {
+                        result[col] = values.map(v => v.toString().trim());
+                    }
+                });
+                result._n = completeRows.length;
+                return result;
+            }
+
+            // ==================== STATISTICAL FUNCTIONS ====================
+            function mean(arr) { return arr.length ? arr.reduce((a, b) => a + b, 0) / arr.length : 0; }
+
+            function std(arr) {
+                if (arr.length < 2) return 0;
+                const m = mean(arr);
+                return Math.sqrt(arr.reduce((a, b) => a + Math.pow(b - m, 2), 0) / (arr.length - 1));
+            }
+
+            function tDistCDF(x, df) {
+                if (x < 0) return 1 - tDistCDF(-x, df);
+                const a = df / 2;
+                const z = df / (df + x * x);
+                return 1 - 0.5 * incompleteBeta(z, a, 0.5);
+            }
+
+            function normalCDF(x) {
+                return 0.5 * (1 + erf(x / Math.SQRT2));
+            }
+
+            function erf(x) {
+                const a1 = 0.254829592, a2 = -0.284496736, a3 = 1.421413741,
+                      a4 = -1.453152027, a5 = 1.061405429, p = 0.3275911;
+                const sign = x < 0 ? -1 : 1;
+                x = Math.abs(x);
+                const t = 1 / (1 + p * x);
+                const y = 1 - (((((a5 * t + a4) * t) + a3) * t + a2) * t + a1) * t * Math.exp(-x * x);
+                return sign * y;
+            }
+
+            function incompleteBeta(z, a, b) {
+                if (z < 0 || z > 1) return 0;
+                if (z === 0) return 0;
+                if (z === 1) return 1;
+                const bt = Math.exp(lgamma(a + b) - lgamma(a) - lgamma(b) + a * Math.log(z) + b * Math.log(1 - z));
+                if (z < (a + 1) / (a + b + 2)) {
+                    return bt * betaCF(z, a, b) / a;
+                } else {
+                    return 1 - bt * betaCF(1 - z, b, a) / b;
+                }
+            }
+
+            function betaCF(x, a, b) {
+                const MAX_IT = 100;
+                const EPS = 1e-10;
+                let qab = a + b,
+                    qap = a + 1,
+                    qam = a - 1;
+                let c = 1,
+                    d = 1 - qab * x / qap;
+                if (Math.abs(d) < EPS) d = EPS;
+                d = 1 / d;
+                let h = d;
+                for (let m = 1; m <= MAX_IT; m++) {
+                    let m2 = 2 * m;
+                    let aa = m * (b - m) * x / ((qam + m2) * (a + m2));
+                    d = 1 + aa * d;
+                    if (Math.abs(d) < EPS) d = EPS;
+                    c = 1 + aa / c;
+                    if (Math.abs(c) < EPS) c = EPS;
+                    d = 1 / d;
+                    h *= d * c;
+                    aa = -(a + m) * (qab + m) * x / ((a + m2) * (qap + m2));
+                    d = 1 + aa * d;
+                    if (Math.abs(d) < EPS) d = EPS;
+                    c = 1 + aa / c;
+                    if (Math.abs(c) < EPS) c = EPS;
+                    d = 1 / d;
+                    let del = d * c;
+                    h *= del;
+                    if (Math.abs(del - 1) < EPS) break;
+                }
+                return h;
+            }
+
+            function lgamma(x) {
+                const g = 7;
+                const c = [
+                    0.99999999999980993, 676.5203681218851, -1259.1392167224028,
+                    771.32342877765313, -176.61502916214059, 12.507343278686905,
+                    -0.13857109526572012, 9.9843695780195716e-6, 1.5056327351493116e-7
+                ];
+                if (x < 0.5) {
+                    return Math.log(Math.PI / Math.sin(Math.PI * x)) - lgamma(1 - x);
+                }
+                x -= 1;
+                let a = c[0];
+                const t = x + g + 0.5;
+                for (let i = 1; i < g + 2; i++) a += c[i] / (x + i);
+                return 0.5 * Math.log(2 * Math.PI) + (x + 0.5) * Math.log(t) - t + Math.log(a);
+            }
+
+            function chiSquareCDF(x, df) {
+                if (x < 0) return 0;
+                return lowerIncompleteGammaRegularized(df / 2, x / 2);
+            }
+
+            function lowerIncompleteGammaRegularized(a, x) {
+                if (x < 0 || a <= 0) return 0;
+                if (x === 0) return 0;
+                if (x < a + 1) {
+                    let ap = a, sum = 1 / a, del = sum;
+                    for (let n = 1; n <= 200; n++) {
+                        ap += 1;
+                        del *= x / ap;
+                        sum += del;
+                        if (Math.abs(del) < Math.abs(sum) * 1e-12) break;
+                    }
+                    return sum * Math.exp(-x + a * Math.log(x) - lgamma(a));
+                } else {
+                    let b = x + 1 - a, c = 1e300, d = 1 / b, h = d;
+                    for (let i = 1; i <= 200; i++) {
+                        const an = -i * (i - a);
+                        b += 2;
+                        d = an * d + b; if (Math.abs(d) < 1e-300) d = 1e-300;
+                        c = b + an / c; if (Math.abs(c) < 1e-300) c = 1e-300;
+                        d = 1 / d;
+                        const del = d * c;
+                        h *= del;
+                        if (Math.abs(del - 1) < 1e-12) break;
+                    }
+                    return 1 - Math.exp(-x + a * Math.log(x) - lgamma(a)) * h;
+                }
+            }
+
+            function incompleteGamma(a, x) {
+                // Kept for compatibility with any external caller; delegates to the
+                // verified regularized-gamma implementation above.
+                return 1 - lowerIncompleteGammaRegularized(a, x);
+            }
+
+            function fCDF(F, df1, df2) {
+                if (F <= 0) return 0;
+                const x = (df1 * F) / (df1 * F + df2);
+                return incompleteBeta(x, df1 / 2, df2 / 2);
+            }
+
+            // ==================== TEST FUNCTIONS ====================
+            function tTestOneSample(data, mu0, alternative) {
+                const n = data.length;
+                const m = mean(data);
+                const s = std(data);
+                const se = s / Math.sqrt(n);
+                const t = (m - mu0) / se;
+                const df = n - 1;
+                let p;
+                const absT = Math.abs(t);
+                if (alternative === 'two') {
+                    p = 2 * (1 - tDistCDF(absT, df));
+                } else if (alternative === 'greater') {
+                    p = 1 - tDistCDF(t, df);
+                } else {
+                    p = tDistCDF(t, df);
+                }
+                return { statistic: t, df: df, pValue: p, mean: m, sd: s, n: n };
+            }
+
+            function tTestTwoSample(data1, data2, alternative) {
+                const n1 = data1.length,
+                    n2 = data2.length;
+                const m1 = mean(data1),
+                    m2 = mean(data2);
+                const s1 = std(data1),
+                    s2 = std(data2);
+                const pooledVar = ((n1 - 1) * s1 * s1 + (n2 - 1) * s2 * s2) / (n1 + n2 - 2);
+                const se = Math.sqrt(pooledVar * (1 / n1 + 1 / n2));
+                const t = (m1 - m2) / se;
+                const df = n1 + n2 - 2;
+                let p;
+                const absT = Math.abs(t);
+                if (alternative === 'two') {
+                    p = 2 * (1 - tDistCDF(absT, df));
+                } else if (alternative === 'greater') {
+                    p = 1 - tDistCDF(t, df);
+                } else {
+                    p = tDistCDF(t, df);
+                }
+                return { statistic: t, df: df, pValue: p, mean1: m1, mean2: m2, sd1: s1, sd2: s2, n1: n1, n2: n2 };
+            }
+
+            function zTestProportionOne(success, n, p0, alternative) {
+                const p_hat = success / n;
+                const se = Math.sqrt(p0 * (1 - p0) / n);
+                const z = (p_hat - p0) / se;
+                let p;
+                const absZ = Math.abs(z);
+                if (alternative === 'two') {
+                    p = 2 * (1 - normalCDF(absZ));
+                } else if (alternative === 'greater') {
+                    p = 1 - normalCDF(z);
+                } else {
+                    p = normalCDF(z);
+                }
+                return { statistic: z, pValue: p, p_hat: p_hat, n: n };
+            }
+
+            function zTestProportionTwo(s1, n1, s2, n2, alternative) {
+                const p1 = s1 / n1,
+                    p2 = s2 / n2;
+                const p_pooled = (s1 + s2) / (n1 + n2);
+                const se = Math.sqrt(p_pooled * (1 - p_pooled) * (1 / n1 + 1 / n2));
+                const z = (p1 - p2) / se;
+                let p;
+                const absZ = Math.abs(z);
+                if (alternative === 'two') {
+                    p = 2 * (1 - normalCDF(absZ));
+                } else if (alternative === 'greater') {
+                    p = 1 - normalCDF(z);
+                } else {
+                    p = normalCDF(z);
+                }
+                return { statistic: z, pValue: p, p1: p1, p2: p2, n1: n1, n2: n2 };
+            }
+
+            function chiSquareIndependence(data1, data2) {
+                const table = {};
+                const rowTotals = {},
+                    colTotals = {};
+                let total = 0;
+                const unique1 = [...new Set(data1)];
+                const unique2 = [...new Set(data2)];
+                unique1.forEach(r => { rowTotals[r] = 0;
+                    table[r] = {}; });
+                unique2.forEach(c => { colTotals[c] = 0;
+                    unique1.forEach(r => { table[r][c] = 0; }); });
+                for (let i = 0; i < data1.length; i++) {
+                    const r = data1[i],
+                        c = data2[i];
+                    if (table[r] && table[r][c] !== undefined) {
+                        table[r][c]++;
+                        rowTotals[r]++;
+                        colTotals[c]++;
+                        total++;
+                    }
+                }
+                let chi2 = 0,
+                    df = (unique1.length - 1) * (unique2.length - 1);
+                unique1.forEach(r => {
+                    unique2.forEach(c => {
+                        const obs = table[r][c] || 0;
+                        const exp = (rowTotals[r] * colTotals[c]) / total;
+                        if (exp > 0) chi2 += Math.pow(obs - exp, 2) / exp;
+                    });
+                });
+                const p = 1 - chiSquareCDF(chi2, df);
+                return { statistic: chi2, df: df, pValue: p, table: table, rowTotals: rowTotals, colTotals: colTotals,
+                    total: total };
+            }
+
+            function chiSquareGOF(data, expected) {
+                const allCategories = new Set([...data, ...Object.keys(expected)]);
+                const obs = {};
+                data.forEach(v => { obs[v] = (obs[v] || 0) + 1; });
+                Object.keys(expected).forEach(cat => {
+                    if (!(cat in obs)) {
+                        obs[cat] = 0;
+                    }
+                });
+
+                let chi2 = 0,
+                    df = allCategories.size - 1;
+                allCategories.forEach(cat => {
+                    const o = obs[cat] || 0;
+                    const e = expected[cat] || 0;
+                    if (e > 0) chi2 += Math.pow(o - e, 2) / e;
+                });
+                const p = 1 - chiSquareCDF(chi2, df);
+                return { statistic: chi2, df: df, pValue: p, observed: obs, expected: expected };
+            }
+
+            function anovaOneWay(data, groups) {
+                const groupMap = {};
+                for (let i = 0; i < data.length; i++) {
+                    const g = groups[i];
+                    if (!groupMap[g]) groupMap[g] = [];
+                    groupMap[g].push(data[i]);
+                }
+                const groupNames = Object.keys(groupMap);
+                const groupData = groupNames.map(g => groupMap[g]);
+                const means = groupData.map(arr => mean(arr));
+                const vars = groupData.map(arr => std(arr) * std(arr));
+                const ns = groupData.map(arr => arr.length);
+                const grandMean = mean(data);
+                let SSB = 0,
+                    SSW = 0;
+                const k = groupNames.length;
+                const N = data.length;
+                for (let i = 0; i < k; i++) {
+                    SSB += ns[i] * Math.pow(means[i] - grandMean, 2);
+                    SSW += (ns[i] - 1) * (vars[i] || 0);
+                }
+                const MSB = SSB / (k - 1);
+                const MSW = SSW / (N - k);
+                const F = MSB / MSW;
+                const df1 = k - 1,
+                    df2 = N - k;
+                const p = 1 - fCDF(F, df1, df2);
+                return {
+                    statistic: F,
+                    df1: df1,
+                    df2: df2,
+                    pValue: p,
+                    SSB: SSB,
+                    SSW: SSW,
+                    MSB: MSB,
+                    MSW: MSW,
+                    groupMeans: means,
+                    groupNames: groupNames,
+                    ns: ns,
+                    groupData: groupData
+                };
+            }
+
+            // ==================== SCATTERPLOT ====================
+            function renderScatterplot(xData, yData, xLabel, yLabel) {
+                const container = document.getElementById('scatterResult');
+                const n = xData.length;
+
+                if (n < 2) {
+                    container.textContent = 'Not enough data points (need at least 2).';
+                    return;
+                }
+
+                const width = 500,
+                    height = 350,
+                    padding = 50;
+                const minX = Math.min(...xData),
+                    maxX = Math.max(...xData);
+                const minY = Math.min(...yData),
+                    maxY = Math.max(...yData);
+                const rangeX = maxX - minX || 1,
+                    rangeY = maxY - minY || 1;
+
+                const scaleX = (v) => padding + ((v - minX) / rangeX) * (width - 2 * padding);
+                const scaleY = (v) => height - padding - ((v - minY) / rangeY) * (height - 2 * padding);
+
+                const mx = mean(xData),
+                    my = mean(yData);
+                const cov = xData.reduce((s, x, i) => s + (x - mx) * (yData[i] - my), 0) / (n - 1);
+                const sx = std(xData),
+                    sy = std(yData);
+                const r = cov / (sx * sy);
+                const slope = r * (sy / sx);
+                const intercept = my - slope * mx;
+
+                const x1 = minX,
+                    x2 = maxX;
+                const y1 = slope * x1 + intercept,
+                    y2 = slope * x2 + intercept;
+
+                let svg = `<svg width="${width}" height="${height}" xmlns="http://www.w3.org/2000/svg">`;
+                svg += `<rect x="0" y="0" width="${width}" height="${height}" fill="white"/>`;
+                svg += `<line x1="${padding}" y1="${height-padding}" x2="${width-padding}" y2="${height-padding}" stroke="#333" stroke-width="1.5"/>`;
+                svg += `<line x1="${padding}" y1="${padding}" x2="${padding}" y2="${height-padding}" stroke="#333" stroke-width="1.5"/>`;
+
+                const xMid = padding + (width - 2 * padding) / 2;
+                const yMid = height - padding / 2;
+                svg += `<text x="${xMid}" y="${height-5}" text-anchor="middle" font-size="11" fill="#333">${xLabel}</text>`;
+                svg += `<text x="10" y="${yMid}" text-anchor="middle" font-size="11" fill="#333" transform="rotate(-90,10,${yMid})">${yLabel}</text>`;
+
+                for (let i = 0; i <= 5; i++) {
+                    const xPos = padding + (i / 5) * (width - 2 * padding);
+                    const yPos = padding + (i / 5) * (height - 2 * padding);
+                    svg += `<line x1="${xPos}" y1="${padding}" x2="${xPos}" y2="${height-padding}" stroke="#eee" stroke-width="0.5"/>`;
+                    svg += `<line x1="${padding}" y1="${yPos}" x2="${width-padding}" y2="${yPos}" stroke="#eee" stroke-width="0.5"/>`;
+                    const xVal = (minX + (i / 5) * rangeX).toFixed(1);
+                    const yVal = (maxY - (i / 5) * rangeY).toFixed(1);
+                    svg += `<text x="${xPos}" y="${height-padding+15}" text-anchor="middle" font-size="9" fill="#666">${xVal}</text>`;
+                    svg += `<text x="${padding-10}" y="${yPos+3}" text-anchor="end" font-size="9" fill="#666">${yVal}</text>`;
+                }
+
+                const regX1 = scaleX(x1),
+                    regY1 = scaleY(y1);
+                const regX2 = scaleX(x2),
+                    regY2 = scaleY(y2);
+                svg += `<line x1="${regX1}" y1="${regY1}" x2="${regX2}" y2="${regY2}" stroke="#8b1e2b" stroke-width="2" stroke-dasharray="6,3"/>`;
+
+                for (let i = 0; i < n; i++) {
+                    const cx = scaleX(xData[i]);
+                    const cy = scaleY(yData[i]);
+                    svg += `<circle cx="${cx}" cy="${cy}" r="5" fill="#2d6a4f" opacity="0.7" stroke="white" stroke-width="1"/>`;
+                }
+
+                svg += `</svg>`;
+
+                let result = svg;
+                result += `\n\nCorrelation: r = ${r.toFixed(4)}, r² = ${(r*r).toFixed(4)}`;
+                result += `\nn = ${n}`;
+                result += `\nRegression: y = ${slope.toFixed(4)}x + ${intercept.toFixed(4)}`;
+                result += `\n\nInterpretation: There is a ${Math.abs(r) < 0.3 ? 'weak' : Math.abs(r) < 0.7 ? 'moderate' : 'strong'} ${r > 0 ? 'positive' : 'negative'} correlation between ${xLabel} and ${yLabel}.`;
+                result += ` ${r*r > 0.25 ? `The model explains ${(r*r*100).toFixed(1)}% of the variance.` : ''}`;
+
+                container.innerHTML = result;
+            }
+
+            // ==================== ANALYSIS HANDLERS ====================
+            function runScatterplot() {
+                const xVar = document.getElementById('scatterX').value;
+                const yVar = document.getElementById('scatterY').value;
+                const resultDiv = document.getElementById('scatterResult');
+
+                if (!xVar || !yVar) {
+                    resultDiv.textContent = 'Please select both X and Y variables.';
+                    return;
+                }
+
+                const aligned = getAlignedData([xVar, yVar]);
+                const n = aligned._n;
+
+                if (n < 2) {
+                    resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 2.`;
+                    return;
+                }
+
+                const xData = aligned[xVar];
+                const yData = aligned[yVar];
+
+                const xLabel = document.getElementById('scatterX').options[document.getElementById('scatterX').selectedIndex]
+                    .text;
+                const yLabel = document.getElementById('scatterY').options[document.getElementById('scatterY').selectedIndex]
+                    .text;
+
+                renderScatterplot(xData, yData, xLabel, yLabel);
+            }
+
+            function runRegression() {
+                const yVar = document.getElementById('regY').value;
+                const checkboxes = document.querySelectorAll('#regXContainer input[type="checkbox"]:checked');
+                const xVars = Array.from(checkboxes).map(cb => cb.value);
+                const resultDiv = document.getElementById('regResult');
+
+                if (!yVar || xVars.length === 0) {
+                    resultDiv.textContent = 'Please select a response variable and at least one predictor.';
+                    return;
+                }
+
+                const allVars = [yVar, ...xVars];
+                const aligned = getAlignedData(allVars);
+                const n = aligned._n;
+
+                if (n < 2) {
+                    resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 2.`;
+                    return;
+                }
+
+                const yData = aligned[yVar];
+                const xData = xVars.map(v => aligned[v]);
+
+                const X = [];
+                for (let i = 0; i < n; i++) {
+                    const row = [1];
+                    xVars.forEach((v, idx) => {
+                        row.push(xData[idx][i]);
+                    });
+                    X.push(row);
+                }
+
+                const xt = [];
+                for (let j = 0; j < X[0].length; j++) {
+                    xt[j] = X.map(row => row[j]);
+                }
+
+                const xtx = [];
+                for (let i = 0; i < xt.length; i++) {
+                    xtx[i] = [];
+                    for (let j = 0; j < xt.length; j++) {
+                        xtx[i][j] = xt[i].reduce((sum, _, k) => sum + xt[i][k] * xt[j][k], 0);
+                    }
+                }
+
+                const xty = xt.map(row => row.reduce((sum, v, k) => sum + v * yData[k], 0));
+
+                function solveLinear(A, b) {
+                    const n = A.length;
+                    const aug = A.map((row, i) => [...row, b[i]]);
+                    for (let i = 0; i < n; i++) {
+                        let maxRow = i;
+                        for (let k = i + 1; k < n; k++) {
+                            if (Math.abs(aug[k][i]) > Math.abs(aug[maxRow][i])) maxRow = k;
+                        }
+                        [aug[i], aug[maxRow]] = [aug[maxRow], aug[i]];
+                        const pivot = aug[i][i];
+                        if (Math.abs(pivot) < 1e-10) continue;
+                        for (let j = i; j <= n; j++) aug[i][j] /= pivot;
+                        for (let k = 0; k < n; k++) {
+                            if (k !== i) {
+                                const factor = aug[k][i];
+                                for (let j = i; j <= n; j++) aug[k][j] -= factor * aug[i][j];
+                            }
+                        }
+                    }
+                    return aug.map(row => row[n]);
+                }
+
+                const coeffs = solveLinear(xtx, xty);
+
+                const yMean = mean(yData);
+                const ssTot = yData.reduce((s, v) => s + Math.pow(v - yMean, 2), 0);
+                const yPred = X.map(row => row.reduce((sum, v, i) => sum + v * coeffs[i], 0));
+                const ssRes = yData.reduce((s, v, i) => s + Math.pow(v - yPred[i], 2), 0);
+                const r2 = 1 - ssRes / ssTot;
+                const adjR2 = 1 - (1 - r2) * (n - 1) / (n - xVars.length - 1);
+
+                const msRes = ssRes / (n - xVars.length - 1);
+                const msReg = (ssTot - ssRes) / xVars.length;
+                const fStat = msReg / msRes;
+                const fP = 1 - fCDF(fStat, xVars.length, n - xVars.length - 1);
+
+                let result = `Multiple Regression Results\n`;
+                result += `Response: ${document.getElementById('regY').options[document.getElementById('regY').selectedIndex].text}\n`;
+                result += `Predictors: ${xVars.map(v => document.getElementById('regXContainer').querySelector(`input[value="${v}"]`).nextSibling.textContent.trim()).join(', ')}\n\n`;
+                result += `Sample size (complete cases): n = ${n}\n\n`;
+
+                result += `Coefficients:\n`;
+                result += `  Intercept: ${coeffs[0].toFixed(4)}\n`;
+                xVars.forEach((v, idx) => {
+                    const label = document.getElementById('regXContainer').querySelector(`input[value="${v}"]`)
+                        .nextSibling.textContent.trim();
+                    result += `  ${label}: ${coeffs[idx+1].toFixed(4)}\n`;
+                });
+
+                result += `\nModel Summary:\n`;
+                result += `  R² = ${r2.toFixed(4)}, Adjusted R² = ${adjR2.toFixed(4)}\n`;
+                result += `  F-statistic = ${fStat.toFixed(4)}, p-value = ${fP.toFixed(6)}${fP < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+
+                result += `Interpretation: `;
+                if (fP < 0.05) {
+                    result += `The model is statistically significant (p < 0.05). `;
+                    result += `The predictors explain ${(r2*100).toFixed(1)}% of the variance in ${document.getElementById('regY').options[document.getElementById('regY').selectedIndex].text}.`;
+                } else {
+                    result += `The model is not statistically significant (p > 0.05). `;
+                    result += `The predictors do not explain significant variance in the response variable.`;
+                }
+
+                resultDiv.textContent = result;
+            }
+
+            function runTTest() {
+                const testType = document.getElementById('ttestType').value;
+                const varName = document.getElementById('ttestVar').value;
+                const alt = document.getElementById('ttestAlt').value;
+                const resultDiv = document.getElementById('ttestResult');
+
+                if (!varName) {
+                    resultDiv.textContent = 'Please select a variable.';
+                    return;
+                }
+
+                if (testType === 'one') {
+                    const aligned = getAlignedData([varName]);
+                    const n = aligned._n;
+                    const data = aligned[varName];
+
+                    if (n < 2) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 2.`;
+                        return;
+                    }
+
+                    const mu0 = parseFloat(document.getElementById('ttestMu').value) || 0;
+                    const test = tTestOneSample(data, mu0, alt);
+                    const altText = alt === 'two' ? '≠' : alt === 'greater' ? '>' : '<';
+
+                    let result = `One-Sample t-Test\n`;
+                    result += `Variable: ${document.getElementById('ttestVar').options[document.getElementById('ttestVar').selectedIndex].text}\n`;
+                    result += `H₀: μ = ${mu0}, Hₐ: μ ${altText} ${mu0}\n\n`;
+                    result += `n (complete cases) = ${test.n}\n`;
+                    result += `Mean = ${test.mean.toFixed(4)}\n`;
+                    result += `SD = ${test.sd.toFixed(4)}\n`;
+                    result += `t = ${test.statistic.toFixed(4)}\n`;
+                    result += `df = ${test.df}\n`;
+                    result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                    result += `Interpretation: `;
+                    if (test.pValue < 0.05) {
+                        result += `Reject H₀. There is statistically significant evidence that the true mean is ${altText} ${mu0}.`;
+                    } else {
+                        result += `Fail to reject H₀. There is not enough evidence to conclude that the true mean differs from ${mu0}.`;
+                    }
+                    resultDiv.textContent = result;
+                } else {
+                    const groupVar = document.getElementById('ttestGroup').value;
+                    if (!groupVar) {
+                        resultDiv.textContent = 'Please select a group variable for two-sample t-test.';
+                        return;
+                    }
+
+                    const aligned = getAlignedData([varName, groupVar]);
+                    const n = aligned._n;
+
+                    if (n < 4) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 4.`;
+                        return;
+                    }
+
+                    const data = aligned[varName];
+                    const groups = aligned[groupVar];
+                    const uniqueGroups = [...new Set(groups)];
+
+                    if (uniqueGroups.length !== 2) {
+                        resultDiv.textContent = 'Group variable must have exactly two categories for two-sample t-test.';
+                        return;
+                    }
+
+                    const data1 = [],
+                        data2 = [];
+                    for (let i = 0; i < data.length; i++) {
+                        if (groups[i] === uniqueGroups[0]) data1.push(data[i]);
+                        else if (groups[i] === uniqueGroups[1]) data2.push(data[i]);
+                    }
+
+                    if (data1.length < 2 || data2.length < 2) {
+                        resultDiv.textContent = `Each group needs at least 2 observations. Group 1: ${data1.length}, Group 2: ${data2.length}`;
+                        return;
+                    }
+
+                    const test = tTestTwoSample(data1, data2, alt);
+                    const altText = alt === 'two' ? '≠' : alt === 'greater' ? '>' : '<';
+
+                    let result = `Two-Sample t-Test (Independent)\n`;
+                    result += `Variable: ${document.getElementById('ttestVar').options[document.getElementById('ttestVar').selectedIndex].text}\n`;
+                    result += `Groups: ${uniqueGroups[0]} (n=${test.n1}) vs ${uniqueGroups[1]} (n=${test.n2})\n`;
+                    result += `H₀: μ₁ = μ₂, Hₐ: μ₁ ${altText} μ₂\n\n`;
+                    result += `Group 1 (${uniqueGroups[0]}): Mean = ${test.mean1.toFixed(4)}, SD = ${test.sd1.toFixed(4)}\n`;
+                    result += `Group 2 (${uniqueGroups[1]}): Mean = ${test.mean2.toFixed(4)}, SD = ${test.sd2.toFixed(4)}\n\n`;
+                    result += `t = ${test.statistic.toFixed(4)}\n`;
+                    result += `df = ${test.df}\n`;
+                    result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                    result += `Interpretation: `;
+                    if (test.pValue < 0.05) {
+                        result += `Reject H₀. There is statistically significant evidence that the means of the two groups are different.`;
+                        result += ` Group 1 mean (${test.mean1.toFixed(2)}) is ${test.mean1 > test.mean2 ? 'higher' : 'lower'} than Group 2 mean (${test.mean2.toFixed(2)}).`;
+                    } else {
+                        result += `Fail to reject H₀. There is not enough evidence to conclude that the means of the two groups differ.`;
+                    }
+                    resultDiv.textContent = result;
+                }
+            }
+
+            function runZTest() {
+                const testType = document.getElementById('ztestType').value;
+                const varName = document.getElementById('ztestVar').value;
+                const alt = document.getElementById('ztestAlt').value;
+                const resultDiv = document.getElementById('ztestResult');
+
+                if (!varName) {
+                    resultDiv.textContent = 'Please select a variable.';
+                    return;
+                }
+
+                if (testType === 'one') {
+                    const aligned = getAlignedData([varName]);
+                    const n = aligned._n;
+                    const data = aligned[varName];
+
+                    if (n < 5) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 5 for z-test.`;
+                        return;
+                    }
+
+                    const uniqueVals = [...new Set(data)];
+                    const successVal = uniqueVals.find(v => v === 'Yes' || v === '1' || v === 'True' || v === 'Female') || uniqueVals[
+                    0];
+                    const success = data.filter(v => v === successVal).length;
+                    const p0 = parseFloat(document.getElementById('ztestP0').value) || 0.5;
+                    const test = zTestProportionOne(success, n, p0, alt);
+                    const altText = alt === 'two' ? '≠' : alt === 'greater' ? '>' : '<';
+
+                    let result = `One-Sample Z-Test for Proportion\n`;
+                    result += `Variable: ${document.getElementById('ztestVar').options[document.getElementById('ztestVar').selectedIndex].text}\n`;
+                    result += `Success category: "${successVal}"\n`;
+                    result += `H₀: p = ${p0}, Hₐ: p ${altText} ${p0}\n\n`;
+                    result += `Successes = ${success}, n (complete cases) = ${n}\n`;
+                    result += `p̂ = ${test.p_hat.toFixed(4)}\n`;
+                    result += `z = ${test.statistic.toFixed(4)}\n`;
+                    result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                    result += `Interpretation: `;
+                    if (test.pValue < 0.05) {
+                        result += `Reject H₀. There is statistically significant evidence that the true proportion is ${altText} ${p0}.`;
+                    } else {
+                        result += `Fail to reject H₀. There is not enough evidence to conclude that the proportion differs from ${p0}.`;
+                    }
+                    resultDiv.textContent = result;
+                } else {
+                    const groupVar = document.getElementById('ztestGroup').value;
+                    if (!groupVar) {
+                        resultDiv.textContent = 'Please select a group variable for two-sample z-test.';
+                        return;
+                    }
+
+                    const aligned = getAlignedData([varName, groupVar]);
+                    const n = aligned._n;
+
+                    if (n < 10) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 10.`;
+                        return;
+                    }
+
+                    const data = aligned[varName];
+                    const groups = aligned[groupVar];
+                    const uniqueGroups = [...new Set(groups)];
+
+                    if (uniqueGroups.length !== 2) {
+                        resultDiv.textContent = 'Group variable must have exactly two categories for two-sample z-test.';
+                        return;
+                    }
+
+                    const uniqueVals = [...new Set(data)];
+                    const successVal = uniqueVals.find(v => v === 'Yes' || v === '1' || v === 'True' || v === 'Female') || uniqueVals[
+                    0];
+
+                    const success1 = data.filter((v, i) => groups[i] === uniqueGroups[0] && v === successVal).length;
+                    const n1 = groups.filter(g => g === uniqueGroups[0]).length;
+                    const success2 = data.filter((v, i) => groups[i] === uniqueGroups[1] && v === successVal).length;
+                    const n2 = groups.filter(g => g === uniqueGroups[1]).length;
+
+                    if (n1 < 5 || n2 < 5) {
+                        resultDiv.textContent = `Each group needs at least 5 observations. Group 1: ${n1}, Group 2: ${n2}`;
+                        return;
+                    }
+
+                    const test = zTestProportionTwo(success1, n1, success2, n2, alt);
+                    const altText = alt === 'two' ? '≠' : alt === 'greater' ? '>' : '<';
+
+                    let result = `Two-Sample Z-Test for Proportions\n`;
+                    result += `Variable: ${document.getElementById('ztestVar').options[document.getElementById('ztestVar').selectedIndex].text}\n`;
+                    result += `Success category: "${successVal}"\n`;
+                    result += `Groups: ${uniqueGroups[0]} vs ${uniqueGroups[1]}\n`;
+                    result += `H₀: p₁ = p₂, Hₐ: p₁ ${altText} p₂\n\n`;
+                    result += `Group 1 (${uniqueGroups[0]}): Successes = ${success1}, n = ${n1}, p̂ = ${(success1/n1).toFixed(4)}\n`;
+                    result += `Group 2 (${uniqueGroups[1]}): Successes = ${success2}, n = ${n2}, p̂ = ${(success2/n2).toFixed(4)}\n\n`;
+                    result += `z = ${test.statistic.toFixed(4)}\n`;
+                    result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                    result += `Interpretation: `;
+                    if (test.pValue < 0.05) {
+                        result += `Reject H₀. There is statistically significant evidence that the proportions of the two groups differ.`;
+                    } else {
+                        result += `Fail to reject H₀. There is not enough evidence to conclude that the proportions differ.`;
+                    }
+                    resultDiv.textContent = result;
+                }
+            }
+
+            function runChiSquare() {
+                const testType = document.getElementById('chisqType').value;
+                const var1 = document.getElementById('chisqVar1').value;
+                const resultDiv = document.getElementById('chisqResult');
+
+                if (!var1) {
+                    resultDiv.textContent = 'Please select at least one variable.';
+                    return;
+                }
+
+                if (testType === 'independence') {
+                    const var2 = document.getElementById('chisqVar2').value;
+                    if (!var2) {
+                        resultDiv.textContent = 'Please select a second variable for independence test.';
+                        return;
+                    }
+
+                    const aligned = getAlignedData([var1, var2]);
+                    const n = aligned._n;
+
+                    if (n < 2) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 2.`;
+                        return;
+                    }
+
+                    const data1 = aligned[var1];
+                    const data2 = aligned[var2];
+
+                    const test = chiSquareIndependence(data1, data2);
+                    let result = `Chi-Square Test of Independence\n`;
+                    result += `Variable 1: ${document.getElementById('chisqVar1').options[document.getElementById('chisqVar1').selectedIndex].text}\n`;
+                    result += `Variable 2: ${document.getElementById('chisqVar2').options[document.getElementById('chisqVar2').selectedIndex].text}\n\n`;
+                    result += `χ² = ${test.statistic.toFixed(4)}\n`;
+                    result += `df = ${test.df}\n`;
+                    result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n`;
+                    result += `Total (complete cases) = ${test.total}\n\n`;
+
+                    const cats1 = Object.keys(test.table);
+                    const cats2 = Object.keys(test.table[cats1[0]] || {});
+                    result += `Contingency Table:\n`;
+                    let header = '            ';
+                    cats2.forEach(c => { header += `${c.padEnd(12)}`; });
+                    header += '| Row Total';
+                    result += header + '\n';
+                    cats1.forEach(r => {
+                        let rowStr = `${r.padEnd(10)} `;
+                        cats2.forEach(c => {
+                            rowStr += `${(test.table[r][c] || 0).toString().padStart(6)}      `;
+                        });
+                        rowStr += `| ${test.rowTotals[r]}`;
+                        result += rowStr + '\n';
+                    });
+                    let colStr = 'Column Total ';
+                    cats2.forEach(c => { colStr += `${(test.colTotals[c] || 0).toString().padStart(6)}      `; });
+                    result += colStr + '\n\n';
+
+                    result += `Interpretation: `;
+                    if (test.pValue < 0.05) {
+                        result += `Reject H₀. There is statistically significant evidence that the two variables are associated (dependent).`;
+                    } else {
+                        result += `Fail to reject H₀. There is not enough evidence to conclude that the variables are associated (they appear independent).`;
+                    }
+                    resultDiv.textContent = result;
+                } else {
+                    // Goodness-of-Fit
+                    const aligned = getAlignedData([var1]);
+                    const n = aligned._n;
+
+                    if (n < 2) {
+                        resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 2.`;
+                        return;
+                    }
+
+                    const data = aligned[var1];
+                    const gofType = document.getElementById('chisqGOFType').value;
+
+                    // Define all possible categories for known variables
+                    const varLabels = {
+                        'q2_gender': ['Female', 'Male', 'Non-binary', 'Prefer not to say'],
+                        'q6_happiness': ['Very happy', 'Happy', 'Neutral', 'Unhappy', 'Very unhappy'],
+                        'q9_born_us': ['Yes', 'No'],
+                        'q10_movie': ['Less than 7 days', '7 - 14 days', '15 - 30 days', '31 - 180 days',
+                            'More than 180 days or Never'
+                        ],
+                        'q12_other_institution': ['Yes', 'No'],
+                        'q13_year': ['Freshman', 'Sophomore', 'Junior', 'Senior', 'PSEO/Other'],
+                        'q15_value': ['Grade (GPA)', 'Knowledge and Skills', 'Both equally'],
+                        'q16_ai_excite': ['Very excited', 'Neutral', 'Skeptical'],
+                        'q17_ai_trust': ['High trust', 'Neutral', 'Low trust'],
+                        'q19_emphasis': ['Theoretical depth', 'Hands-on projects', 'Class interaction',
+                            'Cutting-edge cases', 'Career development'
+                        ]
+                    };
+
+                    // Get all categories for this variable
+                    let allCategories = varLabels[var1] || [];
+                    if (allCategories.length === 0) {
+                        // If not in our list, use unique values from data
+                        allCategories = [...new Set(data)];
+                    }
+
+                    const expected = {};
+
+                    if (gofType === 'equal') {
+                        const prop = 1 / allCategories.length;
+                        allCategories.forEach(cat => {
+                            expected[cat] = prop * n;
+                        });
+                    } else {
+                        // Custom proportions - collect from input fields
+                        const inputs = document.querySelectorAll('.gof-prop-input');
+                        inputs.forEach(input => {
+                            const cat = input.dataset.category;
+                            const val = parseFloat(input.value);
+                            if (!isNaN(val) && val >= 0 && val <= 1) {
+                                expected[cat] = val * n;
+                            } else {
+                                expected[cat] = n / allCategories.length;
+                            }
+                        });
+                        if (Object.keys(expected).length === 0) {
+                            const prop = 1 / allCategories.length;
+                            allCategories.forEach(cat => {
+                                expected[cat] = prop * n;
+                            });
+                        }
+                    }
+
+                    // Ensure all categories have expected values
+                    allCategories.forEach(cat => {
+                        if (!(cat in expected)) {
+                            expected[cat] = n / allCategories.length;
+                        }
+                    });
+
+                    // Get observed counts for all categories (including those with 0)
+                    const obs = {};
+                    allCategories.forEach(cat => {
+                        obs[cat] = data.filter(v => v === cat).length;
+                    });
+
+                    // Calculate chi-square statistic
+                    let chi2 = 0;
+                    let df = allCategories.length - 1;
+                    allCategories.forEach(cat => {
+                        const o = obs[cat] || 0;
+                        const e = expected[cat] || 0;
+                        if (e > 0) {
+                            chi2 += Math.pow(o - e, 2) / e;
+                        }
+                    });
+                    const p = 1 - chiSquareCDF(chi2, df);
+
+                    let result = `Chi-Square Goodness-of-Fit Test\n`;
+                    result += `Variable: ${document.getElementById('chisqVar1').options[document.getElementById('chisqVar1').selectedIndex].text}\n\n`;
+                    result += `χ² = ${chi2.toFixed(4)}\n`;
+                    result += `df = ${df}\n`;
+                    result += `p-value = ${p.toFixed(6)}${p < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                    result += `Observed vs Expected (n = ${n} complete cases):\n`;
+                    // Sort categories by observed count (descending) for better readability
+                    const sortedCats = [...allCategories].sort((a, b) => (obs[b] || 0) - (obs[a] || 0));
+                    sortedCats.forEach(cat => {
+                        const o = obs[cat] || 0;
+                        const e = expected[cat] || 0;
+                        const diff = o - e;
+                        result +=
+                            `  ${cat}: Observed = ${o}, Expected = ${e.toFixed(2)}, Difference = ${diff.toFixed(2)}\n`;
+                    });
+
+                    result += `\nInterpretation: `;
+                    if (p < 0.05) {
+                        result += `Reject H₀. The distribution differs significantly from the expected distribution.`;
+                    } else {
+                        result += `Fail to reject H₀. The observed distribution matches the expected distribution.`;
+                    }
+                    resultDiv.textContent = result;
+                }
+            }
+
+            function runANOVA() {
+                const yVar = document.getElementById('anovaY').value;
+                const groupVar = document.getElementById('anovaGroup').value;
+                const resultDiv = document.getElementById('anovaResult');
+
+                if (!yVar || !groupVar) {
+                    resultDiv.textContent = 'Please select both response and group variables.';
+                    return;
+                }
+
+                const aligned = getAlignedData([yVar, groupVar]);
+                const n = aligned._n;
+
+                if (n < 3) {
+                    resultDiv.textContent = `Not enough complete observations (n = ${n}). Need at least 3.`;
+                    return;
+                }
+
+                const yData = aligned[yVar];
+                const groups = aligned[groupVar];
+                const uniqueGroups = [...new Set(groups)];
+
+                if (uniqueGroups.length < 2) {
+                    resultDiv.textContent = 'Group variable must have at least 2 categories for ANOVA.';
+                    return;
+                }
+
+                const test = anovaOneWay(yData, groups);
+
+                let result = `One-Way ANOVA F-Test\n`;
+                result += `Response: ${document.getElementById('anovaY').options[document.getElementById('anovaY').selectedIndex].text}\n`;
+                result += `Factor: ${document.getElementById('anovaGroup').options[document.getElementById('anovaGroup').selectedIndex].text}\n\n`;
+                result += `F = ${test.statistic.toFixed(4)}\n`;
+                result += `df1 = ${test.df1}, df2 = ${test.df2}\n`;
+                result += `p-value = ${test.pValue.toFixed(6)}${test.pValue < 0.0001 ? ' (< 0.0001)' : ''}\n\n`;
+                result += `Group Means (n = ${n} complete cases):\n`;
+                test.groupNames.forEach((name, i) => {
+                    const sd = std(test.groupData[i] || []);
+                    result += `  ${name}: n = ${test.ns[i]}, Mean = ${test.groupMeans[i].toFixed(4)}, SD = ${sd.toFixed(4)}\n`;
+                });
+                result += `\nSSB = ${test.SSB.toFixed(4)}, SSW = ${test.SSW.toFixed(4)}\n`;
+                result += `MSB = ${test.MSB.toFixed(4)}, MSW = ${test.MSW.toFixed(4)}\n`;
+                result += `\nInterpretation: `;
+                if (test.pValue < 0.05) {
+                    result += `Reject H₀. There is statistically significant evidence that at least one group mean differs from the others.`;
+                    const maxMean = Math.max(...test.groupMeans);
+                    const maxIdx = test.groupMeans.indexOf(maxMean);
+                    const minMean = Math.min(...test.groupMeans);
+                    const minIdx = test.groupMeans.indexOf(minMean);
+                    result +=
+                        ` The highest mean is for "${test.groupNames[maxIdx]}" (${maxMean.toFixed(2)}) and the lowest is for "${test.groupNames[minIdx]}" (${minMean.toFixed(2)}).`;
+                } else {
+                    result += `Fail to reject H₀. There is not enough evidence to conclude that the group means differ significantly.`;
+                }
+
+                resultDiv.textContent = result;
+            }
+
+            // ==================== GOF CUSTOM PROPORTIONS UI ====================
+            function updateGOFInputs() {
+                const varName = document.getElementById('chisqVar1').value;
+                const container = document.getElementById('chisqGOFInputs');
+                const gofType = document.getElementById('chisqGOFType').value;
+
+                if (!varName || gofType !== 'custom') {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                // Define all possible categories for known variables
+                const varLabels = {
+                    'q2_gender': ['Female', 'Male', 'Non-binary', 'Prefer not to say'],
+                    'q6_happiness': ['Very happy', 'Happy', 'Neutral', 'Unhappy', 'Very unhappy'],
+                    'q9_born_us': ['Yes', 'No'],
+                    'q10_movie': ['Less than 7 days', '7 - 14 days', '15 - 30 days', '31 - 180 days',
+                        'More than 180 days or Never'
+                    ],
+                    'q12_other_institution': ['Yes', 'No'],
+                    'q13_year': ['Freshman', 'Sophomore', 'Junior', 'Senior', 'PSEO/Other'],
+                    'q15_value': ['Grade (GPA)', 'Knowledge and Skills', 'Both equally'],
+                    'q16_ai_excite': ['Very excited', 'Neutral', 'Skeptical'],
+                    'q17_ai_trust': ['High trust', 'Neutral', 'Low trust'],
+                    'q19_emphasis': ['Theoretical depth', 'Hands-on projects', 'Class interaction',
+                        'Cutting-edge cases', 'Career development'
+                    ]
+                };
+
+                // Get the actual data to see which categories have observations
+                const data = getCategoricalValues(varName);
+                const observedCategories = new Set(data);
+
+                // Get all possible categories for this variable
+                let allCategories = varLabels[varName] || [];
+                if (allCategories.length === 0) {
+                    // If not in our list, use unique values from data
+                    allCategories = [...new Set(data)];
+                }
+
+                if (allCategories.length === 0) {
+                    container.style.display = 'none';
+                    return;
+                }
+
+                let html = '<div class="gof-proportion-input">';
+                // Show each category with its observed count
+                allCategories.forEach(cat => {
+                    const obsCount = observedCategories.has(cat) ? data.filter(v => v === cat).length : 0;
+                    const defaultProp = (1 / allCategories.length).toFixed(2);
+                    html += `<span class="prop-item">
+                                <label>${cat} (obs: ${obsCount}):</label>
+                                <input type="number" class="gof-prop-input" data-category="${cat}" value="${defaultProp}" min="0" max="1" step="0.01" />
+                            </span>`;
+                });
+                html += '</div>';
+                container.innerHTML = html;
+                container.style.display = 'block';
+            }
+
+            // ==================== DATA VIEWER ====================
+            function openDataViewer() {
+                if (rawDataArray.length === 0) {
+                    showToast('No data available. Load results first.', true);
+                    return;
+                }
+                filteredData = [...rawDataArray];
+                currentPage = 1;
+                sortColumn = null;
+                sortAsc = true;
+                dataViewerSearch.value = '';
+                renderDataViewer();
+                dataViewerModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeDataViewer() {
+                dataViewerModal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            function renderDataViewer() {
+                const searchTerm = dataViewerSearch.value.toLowerCase().trim();
+
+                if (searchTerm) {
+                    filteredData = rawDataArray.filter(row => {
+                        return Object.values(row).some(val => {
+                            if (val === null || val === undefined) return false;
+                            return String(val).toLowerCase().includes(searchTerm);
+                        });
+                    });
+                } else {
+                    filteredData = [...rawDataArray];
+                }
+
+                if (sortColumn && filteredData.length > 0) {
+                    filteredData.sort((a, b) => {
+                        let valA = a[sortColumn] || '';
+                        let valB = b[sortColumn] || '';
+                        if (typeof valA === 'string') valA = valA.toLowerCase();
+                        if (typeof valB === 'string') valB = valB.toLowerCase();
+                        if (valA < valB) return sortAsc ? -1 : 1;
+                        if (valA > valB) return sortAsc ? 1 : -1;
+                        return 0;
+                    });
+                }
+
+                const total = filteredData.length;
+                const totalPages = Math.ceil(total / rowsPerPage) || 1;
+                if (currentPage > totalPages) currentPage = totalPages;
+                const start = (currentPage - 1) * rowsPerPage;
+                const end = Math.min(start + rowsPerPage, total);
+                const pageData = filteredData.slice(start, end);
+
+                dataViewerCount.textContent = `Showing ${total > 0 ? start+1 : 0}-${end} of ${total} rows`;
+
+                let headerHtml = '<tr><th>#</th>';
+                const columns = rawDataArray.length > 0 ? Object.keys(rawDataArray[0]) : [];
+                const columnLabels = {
+                    'timestamp': 'Timestamp',
+                    'class': 'Class',
+                    'q1_height': 'Height (in)',
+                    'q2_gender': 'Gender',
+                    'q3_study_hours': 'Study Hrs',
+                    'q4_screen_time': 'Screen (min)',
+                    'q5_exercise_hours': 'Exercise (hrs)',
+                    'q6_happiness': 'Happiness',
+                    'q7_pets': 'Pets',
+                    'q8_phone_minutes': 'Phone (min)',
+                    'q9_born_us': 'Born US',
+                    'q10_movie': 'Movie Theater',
+                    'q11_stuffed_animals': 'Stuffed Animals',
+                    'q12_other_institution': 'Other Inst',
+                    'q13_year': 'Year',
+                    'q14_random_number': 'Random #',
+                    'q15_value': 'Grade vs Skills',
+                    'q16_ai_excite': 'AI Excitement',
+                    'q17_ai_trust': 'AI Trust',
+                    'q18_expectation': 'Expectation',
+                    'q19_emphasis': 'Emphasis'
+                };
+                columns.forEach(col => {
+                    const label = columnLabels[col] || col;
+                    const sortIcon = sortColumn === col ? (sortAsc ? '▲' : '▼') : '';
+                    headerHtml +=
+                        `<th data-col="${col}" onclick="window._dvSort('${col}')">${label} <span class="sort-icon">${sortIcon}</span></th>`;
+                });
+                headerHtml += '</tr>';
+                dataViewerHeader.innerHTML = headerHtml;
+
+                let bodyHtml = '';
+                pageData.forEach((row, idx) => {
+                    bodyHtml += `<tr>`;
+                    bodyHtml += `<td>${start + idx + 1}</td>`;
+                    columns.forEach(col => {
+                        let val = row[col];
+                        if (val === undefined || val === null) val = '';
+                        bodyHtml += `<td>${String(val)}</td>`;
+                    });
+                    bodyHtml += `</tr>`;
+                });
+                if (pageData.length === 0) {
+                    bodyHtml = `<tr><td colspan="${columns.length + 1}" style="text-align:center;padding:1.5rem;color:#5e5a52;">No matching rows found</td></tr>`;
+                }
+                dataViewerBody.innerHTML = bodyHtml;
+
+                let paginationHtml = '';
+                paginationHtml += `<button onclick="window._dvPage(${currentPage - 1})" ${currentPage <= 1 ? 'disabled' : ''}>‹</button>`;
+                const maxButtons = 5;
+                let startPage = Math.max(1, currentPage - Math.floor(maxButtons / 2));
+                let endPage = Math.min(totalPages, startPage + maxButtons - 1);
+                if (endPage - startPage < maxButtons - 1) {
+                    startPage = Math.max(1, endPage - maxButtons + 1);
+                }
+                for (let p = startPage; p <= endPage; p++) {
+                    paginationHtml +=
+                        `<button onclick="window._dvPage(${p})" ${p === currentPage ? 'class="active"' : ''}>${p}</button>`;
+                }
+                paginationHtml +=
+                    `<button onclick="window._dvPage(${currentPage + 1})" ${currentPage >= totalPages ? 'disabled' : ''}>›</button>`;
+                dataViewerPagination.innerHTML = paginationHtml;
+            }
+
+            window._dvSort = function(col) {
+                if (sortColumn === col) {
+                    sortAsc = !sortAsc;
+                } else {
+                    sortColumn = col;
+                    sortAsc = true;
+                }
+                renderDataViewer();
+            };
+
+            window._dvPage = function(page) {
+                const totalPages = Math.ceil(filteredData.length / rowsPerPage) || 1;
+                if (page < 1 || page > totalPages) return;
+                currentPage = page;
+                renderDataViewer();
+            };
+
+            // ==================== MODAL CONTROLS ====================
+            function openModal() {
+                if (rawDataArray.length === 0) {
+                    showToast('Please load data first by clicking "View Survey Results".', true);
+                    return;
+                }
+                populateAnalysisDropdowns();
+                modal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            }
+
+            function closeModal() {
+                modal.classList.remove('active');
+                document.body.style.overflow = '';
+            }
+
+            // ==================== DOWNLOAD CSV ====================
+            function downloadCSV() {
+                if (!latestData || !latestData.rawData || latestData.rawData.length === 0) {
+                    showToast('No raw data available to download. Load results first.', true);
+                    return;
+                }
+
+                try {
+                    const headers = [
+                        'Timestamp', 'Class',
+                        'Height (inches)', 'Gender', 'Study Hrs/Week', 'Screen Time (min)',
+                        'Exercise (hrs)', 'Happiness', 'Pets (count)', 'Phone (min)',
+                        'Born in US', 'Movie Theater', 'Stuffed Animals', 'Other Institution',
+                        'Year', 'Random #', 'Grade vs. Skills', 'AI Excitement', 'AI Trust',
+                        'Course Expectations (Q18)', 'Course Emphasis (Q19)'
+                    ];
+
+                    let csvRows = [];
+                    csvRows.push(headers.join(','));
+
+                    latestData.rawData.forEach(row => {
+                        const rowData = [
+                            row.timestamp || '',
+                            row.class || 'Unspecified',
+                            row.q1_height || '',
+                            row.q2_gender || '',
+                            row.q3_study_hours || '',
+                            row.q4_screen_time || '',
+                            row.q5_exercise_hours || '',
+                            row.q6_happiness || '',
+                            row.q7_pets || '',
+                            row.q8_phone_minutes || '',
+                            row.q9_born_us || '',
+                            row.q10_movie || '',
+                            row.q11_stuffed_animals || '',
+                            row.q12_other_institution || '',
+                            row.q13_year || '',
+                            row.q14_random_number || '',
+                            row.q15_value || '',
+                            row.q16_ai_excite || '',
+                            row.q17_ai_trust || '',
+                            row.q18_expectation || '',
+                            row.q19_emphasis || ''
+                        ];
+                        const escapedRow = rowData.map(cell => {
+                            if (typeof cell === 'string' && (cell.includes(',') || cell.includes('"') || cell
+                                    .includes('\n'))) {
+                                return `"${cell.replace(/"/g, '""')}"`;
+                            }
+                            return cell;
+                        });
+                        csvRows.push(escapedRow.join(','));
+                    });
+
+                    const csvContent = csvRows.join('\n');
+                    const blob = new Blob(['\uFEFF' + csvContent], { type: 'text/csv;charset=utf-8;' });
+                    const link = document.createElement('a');
+                    const url = URL.createObjectURL(blob);
+                    link.setAttribute('href', url);
+                    link.setAttribute('download', `survey_data_${new Date().toISOString().slice(0,10)}.csv`);
+                    document.body.appendChild(link);
+                    link.click();
+                    document.body.removeChild(link);
+                    URL.revokeObjectURL(url);
+                    showToast('CSV downloaded successfully!');
+                } catch (err) {
+                    console.error('Download error:', err);
+                    showToast('Failed to download CSV. Please try again.', true);
+                }
+            }
+
+            // ==================== EVENT BINDING ====================
+            showResultsBtn.addEventListener('click', fetchResults);
+            refreshBtn.addEventListener('click', fetchResults);
+            downloadBtn.addEventListener('click', downloadCSV);
+            analyzeBtn.addEventListener('click', openModal);
+            viewDataBtn.addEventListener('click', openDataViewer);
+            modalClose.addEventListener('click', closeModal);
+            modal.addEventListener('click', function(e) {
+                if (e.target === this) closeModal();
+            });
+            dataViewerCloseBtn.addEventListener('click', closeDataViewer);
+            dataViewerModal.addEventListener('click', function(e) {
+                if (e.target === this) closeDataViewer();
+            });
+
+            dataViewerSearch.addEventListener('input', function() {
+                currentPage = 1;
+                renderDataViewer();
+            });
+
+            dataViewerRowsPerPage.addEventListener('change', function() {
+                rowsPerPage = parseInt(this.value);
+                currentPage = 1;
+                renderDataViewer();
+            });
+
+            // Toggle handlers
+            document.getElementById('ttestType').addEventListener('change', function() {
+                document.getElementById('ttestGroupContainer').style.display = this.value === 'two' ? 'inline' : 'none';
+                document.getElementById('ttestMuContainer').style.display = this.value === 'one' ? 'inline' : 'none';
+            });
+
+            document.getElementById('ztestType').addEventListener('change', function() {
+                document.getElementById('ztestGroupContainer').style.display = this.value === 'two' ? 'inline' : 'none';
+                document.getElementById('ztestP0Container').style.display = this.value === 'one' ? 'inline' : 'none';
+            });
+
+            document.getElementById('chisqType').addEventListener('change', function() {
+                document.getElementById('chisqVar2Container').style.display = this.value === 'independence' ?
+                    'inline' : 'none';
+                document.getElementById('chisqGOFContainer').style.display = this.value === 'gof' ? 'inline' :
+                'none';
+                if (this.value === 'gof') {
+                    setTimeout(updateGOFInputs, 100);
+                }
+            });
+
+            document.getElementById('chisqGOFType').addEventListener('change', function() {
+                updateGOFInputs();
+            });
+
+            document.getElementById('chisqVar1').addEventListener('change', function() {
+                if (document.getElementById('chisqType').value === 'gof') {
+                    updateGOFInputs();
+                }
+            });
+
+            document.getElementById('regY').addEventListener('change', function() {
+                updateRegCheckboxes();
+            });
+
+            // Analysis buttons
+            document.querySelectorAll('.run-analysis-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const test = this.dataset.test;
+                    switch (test) {
+                        case 'scatter':
+                            runScatterplot();
+                            break;
+                        case 'regression':
+                            runRegression();
+                            break;
+                        case 'ttest':
+                            runTTest();
+                            break;
+                        case 'ztest':
+                            runZTest();
+                            break;
+                        case 'chisq':
+                            runChiSquare();
+                            break;
+                        case 'anova':
+                            runANOVA();
+                            break;
+                        default:
+                            console.log('Unknown test:', test);
+                    }
+                });
+            });
+
+            // Initial state
+            document.getElementById('ttestGroupContainer').style.display = 'none';
+            document.getElementById('ztestGroupContainer').style.display = 'none';
+            document.getElementById('chisqGOFContainer').style.display = 'none';
+            document.getElementById('chisqGOFInputs').style.display = 'none';
+
+            console.log('Survey app loaded. Ready for data analysis!');
+        })();
+    </script>
 </body>
 </html>
